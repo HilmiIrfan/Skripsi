@@ -1,0 +1,17 @@
+This is a placeholder file. The actual Excel template would need to be created using Excel or a similar tool with the following columns:
+
+For Isian (ISIAN):
+- namaUjian (required)
+- pertanyaan (required)
+- bobot (required)
+- jawabanBenar (required: the correct answer text)
+- toleransiTypo (optional: number indicating typo tolerance)
+- tahunAjaran (required: e.g., "2025/2026")
+- namaSemester (required: "Ganjil" or "Genap")
+- namaKelas (required: "X", "XI", or "XII")
+- namaMapel (required: exact name from API)
+- namaElemen (required: exact name from API)
+- namaAcp (required: exact name from API)
+- namaAtp (required: exact name from API)
+- namaKonsentrasiSekolah (required: exact name from API)
+- idTaksonomi (optional)

@@ -1,0 +1,24 @@
+.sidebar-menu-container {
+  height: calc(100% - 64px);
+}
+// Styling untuk menu Ant Design
+.ant-menu-dark .ant-menu-submenu-title {
+  color: #ffffff; // Warna teks putih secara default
+  transition: color 0.3s; // Animasi transisi warna
+  cursor: pointer;
+}
+
+// Styling untuk submenu yang aktif
+.ant-menu-dark .ant-menu-submenu-open .ant-menu-submenu-title,
+.ant-menu-dark .ant-menu-submenu-selected .ant-menu-submenu-title {
+  color: #1890ff; // Warna teks biru jika ada submenu aktif
+}
+
+// Pastikan menu item lain tetap terlihat normal
+.ant-menu-dark .ant-menu-item {
+  color: #ffffff; // Warna teks putih untuk item menu
+}
+
+.ant-menu-dark .ant-menu-item-selected {
+  color: #ffffff !important; // Warna biru untuk item menu yang dipilih
+}
