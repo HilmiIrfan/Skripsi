@@ -39,6 +39,13 @@ public class UjianSession {
     // Additional metadata
     private Map<String, Object> sessionMetadata;
 
+    // IRT Model 3PL
+    private Double thetaEstimate;
+    private Double standardError;
+    private List<String> administeredQuestionIds;
+    private String currentAdaptiveQuestionId;
+    private Map<String, Object> adaptiveMetadata;
+
     // Relational data (seperti pattern di model Ujian)
     private Ujian ujian;
     private User peserta;
@@ -61,6 +68,10 @@ public class UjianSession {
         this.answers = new HashMap<>();
         this.navigationHistory = new HashMap<>();
         this.sessionMetadata = new HashMap<>();
+        this.thetaEstimate = 0.0;
+        this.standardError = 1.0;
+        this.administeredQuestionIds = new ArrayList<>();
+        this.adaptiveMetadata = new HashMap<>();
         this.violationIds = new ArrayList<>();
         this.securityMetadata = new HashMap<>();
     }
@@ -155,12 +166,26 @@ public class UjianSession {
             this.answers = new HashMap<>();
         }
         this.answers.put(idBankSoal, jawaban);
+        if (this.administeredQuestionIds == null) {
+            this.administeredQuestionIds = new ArrayList<>();
+        }
+        if (idBankSoal != null && !this.administeredQuestionIds.contains(idBankSoal)) {
+            this.administeredQuestionIds.add(idBankSoal);
+        }
         this.answeredQuestions = this.answers.size();
         this.updatedAt = java.time.Instant.now();
     }
 
     public void setAnswers(Map<String, Object> answers) {
         this.answers = answers != null ? answers : new HashMap<>();
+        if (this.administeredQuestionIds == null) {
+            this.administeredQuestionIds = new ArrayList<>();
+        }
+        for (String idBankSoal : this.answers.keySet()) {
+            if (!this.administeredQuestionIds.contains(idBankSoal)) {
+                this.administeredQuestionIds.add(idBankSoal);
+            }
+        }
         this.answeredQuestions = this.answers.size();
         this.updatedAt = java.time.Instant.now();
     }
@@ -282,6 +307,51 @@ public class UjianSession {
 
     public void setSessionMetadata(Map<String, Object> sessionMetadata) {
         this.sessionMetadata = sessionMetadata;
+    }
+
+    public Double getThetaEstimate() {
+        return thetaEstimate;
+    }
+
+    public void setThetaEstimate(Double thetaEstimate) {
+        this.thetaEstimate = thetaEstimate;
+        this.updatedAt = Instant.now();
+    }
+
+    public Double getStandardError() {
+        return standardError;
+    }
+
+    public void setStandardError(Double standardError) {
+        this.standardError = standardError;
+        this.updatedAt = Instant.now();
+    }
+
+    public List<String> getAdministeredQuestionIds() {
+        return administeredQuestionIds;
+    }
+
+    public void setAdministeredQuestionIds(List<String> administeredQuestionIds) {
+        this.administeredQuestionIds = administeredQuestionIds != null ? administeredQuestionIds : new ArrayList<>();
+        this.updatedAt = Instant.now();
+    }
+
+    public String getCurrentAdaptiveQuestionId() {
+        return currentAdaptiveQuestionId;
+    }
+
+    public void setCurrentAdaptiveQuestionId(String currentAdaptiveQuestionId) {
+        this.currentAdaptiveQuestionId = currentAdaptiveQuestionId;
+        this.updatedAt = Instant.now();
+    }
+
+    public Map<String, Object> getAdaptiveMetadata() {
+        return adaptiveMetadata;
+    }
+
+    public void setAdaptiveMetadata(Map<String, Object> adaptiveMetadata) {
+        this.adaptiveMetadata = adaptiveMetadata != null ? adaptiveMetadata : new HashMap<>();
+        this.updatedAt = Instant.now();
     }
 
     // Relational objects (seperti di model Ujian)
@@ -464,6 +534,11 @@ public class UjianSession {
 
         metadata.put("answeredQuestions", this.answeredQuestions);
         metadata.put("totalQuestions", this.totalQuestions);
+        metadata.put("thetaEstimate", this.thetaEstimate);
+        metadata.put("standardError", this.standardError);
+        metadata.put("administeredQuestionIds", this.administeredQuestionIds);
+        metadata.put("currentAdaptiveQuestionId", this.currentAdaptiveQuestionId);
+        metadata.put("adaptiveMetadata", this.adaptiveMetadata);
         hasil.setMetadata(metadata);
 
         // Set relational data
@@ -486,6 +561,8 @@ public class UjianSession {
                 ", attemptNumber=" + attemptNumber +
                 ", answeredQuestions=" + answeredQuestions +
                 ", totalQuestions=" + totalQuestions +
+                ", thetaEstimate=" + thetaEstimate +
+                ", standardError=" + standardError +
                 ", timeRemaining=" + timeRemaining +
                 ", isSubmitted=" + isSubmitted +
                 ", isAutoSubmit=" + isAutoSubmit +

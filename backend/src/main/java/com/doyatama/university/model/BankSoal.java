@@ -18,6 +18,9 @@ public class BankSoal {
     private String toleransiTypo; // Khusus ISIAN
     private List<String> jawabanBenar; // kunci jawaban benar
     private Instant createdAt; // kapan soal dibuat
+    private Double irtDiscrimination; // parameter a pada IRT 3PL
+    private Double irtDifficulty; // parameter b pada IRT 3PL
+    private Double irtGuessing; // parameter c pada IRT 3PL
 
     private SoalUjian soalUjian;
     private TahunAjaran tahunAjaran;
@@ -158,6 +161,30 @@ public class BankSoal {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Double getIrtDiscrimination() {
+        return irtDiscrimination;
+    }
+
+    public void setIrtDiscrimination(Double irtDiscrimination) {
+        this.irtDiscrimination = irtDiscrimination;
+    }
+
+    public Double getIrtDifficulty() {
+        return irtDifficulty;
+    }
+
+    public void setIrtDifficulty(Double irtDifficulty) {
+        this.irtDifficulty = irtDifficulty;
+    }
+
+    public Double getIrtGuessing() {
+        return irtGuessing;
+    }
+
+    public void setIrtGuessing(Double irtGuessing) {
+        this.irtGuessing = irtGuessing;
     }
 
     public Taksonomi getTaksonomi() {

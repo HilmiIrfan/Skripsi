@@ -13,6 +13,9 @@ public class BankSoalUjian {
     private Map<String, String> pasangan;
     private String toleransiTypo;
     private List<String> jawabanBenar;
+    private Double irtDiscrimination;
+    private Double irtDifficulty;
+    private Double irtGuessing;
 
     /**
      * Default constructor diperlukan untuk proses deserialisasi oleh
@@ -37,6 +40,9 @@ public class BankSoalUjian {
         this.pasangan = fullBankSoal.getPasangan();
         this.toleransiTypo = fullBankSoal.getToleransiTypo();
         this.jawabanBenar = fullBankSoal.getJawabanBenar();
+        this.irtDiscrimination = fullBankSoal.getIrtDiscrimination();
+        this.irtDifficulty = fullBankSoal.getIrtDifficulty();
+        this.irtGuessing = fullBankSoal.getIrtGuessing();
     }
 
     // == Getters and Setters untuk semua field ==//
@@ -103,5 +109,29 @@ public class BankSoalUjian {
 
     public void setJawabanBenar(List<String> jawabanBenar) {
         this.jawabanBenar = jawabanBenar;
+    }
+
+    public Double getIrtDiscrimination() {
+        return irtDiscrimination;
+    }
+
+    public void setIrtDiscrimination(Double irtDiscrimination) {
+        this.irtDiscrimination = irtDiscrimination;
+    }
+
+    public Double getIrtDifficulty() {
+        return irtDifficulty;
+    }
+
+    public void setIrtDifficulty(Double irtDifficulty) {
+        this.irtDifficulty = irtDifficulty;
+    }
+
+    public Double getIrtGuessing() {
+        return irtGuessing;
+    }
+
+    public void setIrtGuessing(Double irtGuessing) {
+        this.irtGuessing = irtGuessing;
     }
 }
