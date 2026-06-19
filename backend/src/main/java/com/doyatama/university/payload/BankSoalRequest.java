@@ -28,6 +28,11 @@ public class BankSoalRequest {
     private String idAcp;
     private String idSchool;
 
+    // IRT 3PL parameters (parameter a, b, c)
+    private Double irtDiscrimination; // parameter a: daya pembeda soal
+    private Double irtDifficulty;     // parameter b: tingkat kesulitan soal
+    private Double irtGuessing;       // parameter c: peluang menebak (guessing)
+
     public BankSoalRequest() {
     }
 
@@ -227,6 +232,31 @@ public class BankSoalRequest {
 
     public void setIdSchool(String idSchool) {
         this.idSchool = idSchool;
+    }
+
+    // Getters dan Setters untuk IRT 3PL parameters
+    public Double getIrtDiscrimination() {
+        return irtDiscrimination;
+    }
+
+    public void setIrtDiscrimination(Double irtDiscrimination) {
+        this.irtDiscrimination = irtDiscrimination;
+    }
+
+    public Double getIrtDifficulty() {
+        return irtDifficulty;
+    }
+
+    public void setIrtDifficulty(Double irtDifficulty) {
+        this.irtDifficulty = irtDifficulty;
+    }
+
+    public Double getIrtGuessing() {
+        return irtGuessing;
+    }
+
+    public void setIrtGuessing(Double irtGuessing) {
+        this.irtGuessing = irtGuessing;
     }
 
 }

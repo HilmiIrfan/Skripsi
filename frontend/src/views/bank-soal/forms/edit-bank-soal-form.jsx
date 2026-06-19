@@ -1,7 +1,8 @@
-﻿/* eslint-disable react/prop-types */
+/* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
-import { Form, Input, Modal, Select, Row, Col, message } from "antd";
+import { Form, Input, Modal, Select, Row, Col, message, InputNumber, Tooltip } from "antd";
+import { InfoCircleOutlined } from "@ant-design/icons";
 import { getSchool } from "@/api/school";
 import { reqUserInfo } from "@/api/user";
 import { getKelas } from "@/api/kelas";
@@ -152,6 +153,10 @@ const EditBankSoalForm = ({
         idAcp: currentRowData.acp?.idAcp,
         idAtp: currentRowData.atp?.idAtp,
         idSchool: currentRowData.school?.idSchool,
+        // IRT parameters - pre-fill from existing data
+        irtDiscrimination: currentRowData.irtDiscrimination || null,
+        irtDifficulty: currentRowData.irtDifficulty || null,
+        irtGuessing: currentRowData.irtGuessing || null,
       });
     }
   }, [currentRowData, form]);
@@ -183,6 +188,10 @@ const EditBankSoalForm = ({
         idAtp: values.idAtp,
         idTaksonomi: currentRowData?.taksonomi?.idTaksonomi,
         idSchool: values.idSchool,
+        // IRT 3PL parameters
+        irtDiscrimination: values.irtDiscrimination || null,
+        irtDifficulty: values.irtDifficulty || null,
+        irtGuessing: values.irtGuessing || null,
       };
 
       const jenisSoal = currentRowData?.jenisSoal;
@@ -308,6 +317,49 @@ const EditBankSoalForm = ({
               </Form.Item>
             </Col>
           )}
+
+          {/* IRT 3PL Parameters */}
+          <Col xs={24} sm={24} md={24}>
+            <div style={{
+              marginTop: "16px",
+              padding: "16px",
+              background: "#e6f7ff",
+              borderRadius: "6px",
+              border: "1px solid #91d5ff",
+              marginBottom: "8px"
+            }}>
+              <p style={{ margin: "0 0 12px 0", fontWeight: 600, color: "#0050b3" }}>
+                <InfoCircleOutlined style={{ marginRight: 6 }} />
+                Parameter IRT 3PL (Opsional)
+              </p>
+              <Row gutter={16}>
+                <Col xs={24} sm={24} md={8}>
+                  <Form.Item
+                    label={<span>Parameter <strong>a</strong> — Daya Pembeda <Tooltip title="0.5–2.5. Semakin tinggi = lebih diskriminatif."><InfoCircleOutlined style={{ color: "#1890ff" }} /></Tooltip></span>}
+                    name="irtDiscrimination"
+                  >
+                    <InputNumber min={0} max={3} step={0.1} precision={3} placeholder="mis. 1.2" style={{ width: "100%" }} />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} sm={24} md={8}>
+                  <Form.Item
+                    label={<span>Parameter <strong>b</strong> — Tingkat Kesulitan <Tooltip title="-3 hingga 3. Negatif=mudah, positif=sulit."><InfoCircleOutlined style={{ color: "#1890ff" }} /></Tooltip></span>}
+                    name="irtDifficulty"
+                  >
+                    <InputNumber min={-4} max={4} step={0.1} precision={3} placeholder="mis. 0.0" style={{ width: "100%" }} />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} sm={24} md={8}>
+                  <Form.Item
+                    label={<span>Parameter <strong>c</strong> — Peluang Menebak <Tooltip title="0–0.35. PG 4 opsi ≈ 0.25."><InfoCircleOutlined style={{ color: "#1890ff" }} /></Tooltip></span>}
+                    name="irtGuessing"
+                  >
+                    <InputNumber min={0} max={0.5} step={0.01} precision={3} placeholder="mis. 0.25" style={{ width: "100%" }} />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </div>
+          </Col>
         </Row>
       </Form>
     </Modal>

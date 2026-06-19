@@ -151,6 +151,16 @@ const UjianCATView = () => {
   const [violationDetails, setViolationDetails] = useState("");
   const [criticalViolationModal, setCriticalViolationModal] = useState(false);
 
+  // ==================== STATE CAT/IRT ====================
+  const [isCatMode, setIsCatMode] = useState(false);
+  const [thetaEstimate, setThetaEstimate] = useState(null);
+  const [scaledScore, setScaledScore] = useState(null);
+  const [proficiencyLevel, setProficiencyLevel] = useState(null);
+  const [catShouldStop, setCatShouldStop] = useState(false);
+  const [nextCatQuestionId, setNextCatQuestionId] = useState(null);
+  const [catAnsweredCount, setCatAnsweredCount] = useState(0);
+  // ========================================================
+
   const timerRef = useRef(null);
   const autoSaveRef = useRef(null);
   const keepAliveRef = useRef(null);
@@ -589,6 +599,21 @@ const UjianCATView = () => {
         setSessionActive(true);
         setIsStarted(true);
 
+        // Deteksi mode CAT dari data ujian
+        if (ujianData.isCatEnabled === true) {
+          setIsCatMode(true);
+          // Set soal pertama dari server (nextQuestionId dari session)
+          if (sessionData.currentAdaptiveQuestionId) {
+            setNextCatQuestionId(sessionData.currentAdaptiveQuestionId);
+            // Arahkan ke soal pertama CAT
+            const firstIdx = soalList.findIndex(
+              (s) => s.idBankSoal === sessionData.currentAdaptiveQuestionId
+            );
+            if (firstIdx !== -1) setCurrentSoal(firstIdx);
+          }
+          console.log("[CAT] Mode aktif untuk ujian:", ujianData.idUjian);
+        }
+
         // Hide sidebar on small screens immediately when exam starts
         if (screens.xs || screens.sm) {
           setShowSoalPanel(false);
@@ -829,7 +854,7 @@ const UjianCATView = () => {
 
     // Save individual answer immediately
     try {
-      await saveJawaban({
+      const saveResponse = await saveJawaban({
         idUjian: ujianData.idUjian,
         idPeserta: userInfo.id,
         sessionId: sessionId,
@@ -838,6 +863,50 @@ const UjianCATView = () => {
         attemptNumber: attemptNumber,
         timestamp: new Date().toISOString(),
       });
+
+      // ========== HANDLE CAT RESPONSE ==========
+      if (isCatMode && saveResponse?.data?.data) {
+        const catData = saveResponse.data.data;
+        setCatAnsweredCount((prev) => prev + 1);
+
+        if (catData.thetaEstimate !== undefined) setThetaEstimate(catData.thetaEstimate);
+        if (catData.scaledScore !== undefined) setScaledScore(catData.scaledScore);
+        if (catData.proficiencyLevel !== undefined) setProficiencyLevel(catData.proficiencyLevel);
+
+        const shouldStop = catData.shouldStop === true || catData.nextQuestionId == null;
+        setCatShouldStop(shouldStop);
+
+        if (!shouldStop && catData.nextQuestionId) {
+          // Navigasi ke soal berikutnya yang dipilih server
+          setNextCatQuestionId(catData.nextQuestionId);
+          const nextIdx = soalList.findIndex(
+            (s) => s.idBankSoal === catData.nextQuestionId
+          );
+          if (nextIdx !== -1) {
+            setTimeout(() => goToSoal(nextIdx), 300);
+          } else {
+            console.warn("[CAT] nextQuestionId tidak ditemukan di soalList:", catData.nextQuestionId);
+          }
+        } else if (shouldStop) {
+          // CAT selesai - tampilkan konfirmasi submit
+          Modal.confirm({
+            title: "Ujian CAT Selesai",
+            content: (
+              <div>
+                <p>Sistem telah menentukan bahwa estimasi kemampuan Anda sudah cukup akurat.</p>
+                {catData.proficiencyLevel && (
+                  <p>Level kemampuan: <strong>{catData.proficiencyLevel}</strong></p>
+                )}
+                <p>Apakah Anda ingin mengumpulkan jawaban sekarang?</p>
+              </div>
+            ),
+            okText: "Kumpulkan",
+            cancelText: "Lanjut Isi",
+            onOk: () => handleSubmitUjian(false),
+          });
+        }
+      }
+      // ========================================
     } catch (error) {
       console.error("Failed to save individual answer:", error);
     }
@@ -1452,6 +1521,45 @@ const UjianCATView = () => {
     }
   };
 
+  // Indikator status CAT
+  const renderCatStatus = () => {
+    if (!isCatMode) return null;
+    return (
+      <div style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "6px",
+        padding: "4px 10px",
+        background: "linear-gradient(135deg, #1890ff22, #722ed122)",
+        border: "1px solid #1890ff55",
+        borderRadius: "20px",
+        fontSize: "12px",
+      }}>
+        <span style={{ fontWeight: 600, color: "#1890ff" }}>🧠 CAT</span>
+        {thetaEstimate !== null && (
+          <Tag color="blue" style={{ margin: 0, fontSize: "11px" }}>
+            θ = {thetaEstimate.toFixed(2)}
+          </Tag>
+        )}
+        {proficiencyLevel && (
+          <Tag
+            color={
+              proficiencyLevel === "ADVANCED" ? "green" :
+              proficiencyLevel === "PROFICIENT" ? "blue" :
+              proficiencyLevel === "BASIC" ? "orange" : "red"
+            }
+            style={{ margin: 0, fontSize: "11px" }}
+          >
+            {proficiencyLevel}
+          </Tag>
+        )}
+        <span style={{ color: "#888", fontSize: "11px" }}>
+          {catAnsweredCount} soal
+        </span>
+      </div>
+    );
+  };
+
   // Fetch analysis after ujian selesai - HANYA UNTUK OPERATOR & TEACHER
   useEffect(() => {
     if (isFinished && ujianData && userInfo) {
@@ -1877,6 +1985,69 @@ const UjianCATView = () => {
                   {hasilUjian.durasiPengerjaan || "-"}
                 </Text>
               </div>
+
+              {/* IRT / CAT Results - tampil hanya jika ada data IRT */}
+              {hasilUjian.irtThetaEstimate != null && (
+                <div style={{ marginTop: "20px" }}>
+                  <Title level={5}>🧠 Hasil Computerized Adaptive Testing (IRT 3PL)</Title>
+                  <div style={{
+                    background: "linear-gradient(135deg, #e6f7ff, #f0f5ff)",
+                    border: "1px solid #91d5ff",
+                    borderRadius: "8px",
+                    padding: "16px",
+                  }}>
+                    <Row gutter={[16, 12]}>
+                      <Col xs={24} sm={12} md={6}>
+                        <div style={{ textAlign: "center" }}>
+                          <div style={{ fontSize: "11px", color: "#888", marginBottom: 4 }}>Estimasi Kemampuan (θ)</div>
+                          <div style={{ fontSize: "22px", fontWeight: 700, color: "#1890ff" }}>
+                            {hasilUjian.irtThetaEstimate?.toFixed(3)}
+                          </div>
+                          <div style={{ fontSize: "10px", color: "#aaa" }}>Skala Logit</div>
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} md={6}>
+                        <div style={{ textAlign: "center" }}>
+                          <div style={{ fontSize: "11px", color: "#888", marginBottom: 4 }}>Skor Terukur</div>
+                          <div style={{ fontSize: "22px", fontWeight: 700, color: "#52c41a" }}>
+                            {hasilUjian.irtScaledScore?.toFixed(1) || "-"}
+                          </div>
+                          <div style={{ fontSize: "10px", color: "#aaa" }}>Skala 0–100</div>
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} md={6}>
+                        <div style={{ textAlign: "center" }}>
+                          <div style={{ fontSize: "11px", color: "#888", marginBottom: 4 }}>Level Kemampuan</div>
+                          <Tag
+                            color={
+                              hasilUjian.irtProficiencyLevel === "ADVANCED" ? "green" :
+                              hasilUjian.irtProficiencyLevel === "PROFICIENT" ? "blue" :
+                              hasilUjian.irtProficiencyLevel === "BASIC" ? "orange" : "red"
+                            }
+                            style={{ fontSize: "14px", padding: "4px 12px", marginTop: 2 }}
+                          >
+                            {hasilUjian.irtProficiencyLevel || "-"}
+                          </Tag>
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} md={6}>
+                        <div style={{ textAlign: "center" }}>
+                          <div style={{ fontSize: "11px", color: "#888", marginBottom: 4 }}>Soal CAT Diberikan</div>
+                          <div style={{ fontSize: "22px", fontWeight: 700, color: "#722ed1" }}>
+                            {hasilUjian.irtAdministeredQuestions?.length || "-"}
+                          </div>
+                          <div style={{ fontSize: "10px", color: "#aaa" }}>Soal Adaptif</div>
+                        </div>
+                      </Col>
+                    </Row>
+                    {hasilUjian.irtFinalStandardError != null && (
+                      <div style={{ marginTop: 8, textAlign: "center", fontSize: "11px", color: "#888" }}>
+                        Standard Error Estimasi Akhir: <strong>{hasilUjian.irtFinalStandardError.toFixed(3)}</strong>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
           <Divider />
@@ -2294,6 +2465,12 @@ const UjianCATView = () => {
                   Session: {sessionId ? "Aktif" : "Tidak Aktif"}
                 </Text>
               </div>
+              {/* CAT Status Badge */}
+              {isCatMode && (
+                <div style={{ marginTop: 4 }}>
+                  {renderCatStatus()}
+                </div>
+              )}
             </div>
           </Col>
           <Col xs={24} sm={12} md={8}>

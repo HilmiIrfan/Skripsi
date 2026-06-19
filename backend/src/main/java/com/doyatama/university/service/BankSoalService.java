@@ -129,6 +129,11 @@ public class BankSoalService {
         bankSoal.setAtp(atpResponse);
         bankSoal.setSchool(schoolResponse);
 
+        // IRT 3PL parameters (opsional - boleh null jika belum dikalibrasi)
+        bankSoal.setIrtDiscrimination(bankSoalRequest.getIrtDiscrimination());
+        bankSoal.setIrtDifficulty(bankSoalRequest.getIrtDifficulty());
+        bankSoal.setIrtGuessing(bankSoalRequest.getIrtGuessing());
+
         // Handle different question types
         switch (bankSoalRequest.getJenisSoal().toUpperCase()) {
             case "PG":
@@ -296,6 +301,11 @@ public class BankSoalService {
         updatedBankSoal.setAcp(acpResponse);
         updatedBankSoal.setAtp(atpResponse);
         updatedBankSoal.setSchool(schoolResponse);
+
+        // IRT 3PL parameters (opsional - boleh null jika belum dikalibrasi)
+        updatedBankSoal.setIrtDiscrimination(bankSoalRequest.getIrtDiscrimination());
+        updatedBankSoal.setIrtDifficulty(bankSoalRequest.getIrtDifficulty());
+        updatedBankSoal.setIrtGuessing(bankSoalRequest.getIrtGuessing());
 
         // Handle different question types
         switch (bankSoalRequest.getJenisSoal().toUpperCase()) {

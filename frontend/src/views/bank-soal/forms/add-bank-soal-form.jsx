@@ -12,9 +12,10 @@ import {
   Col,
   Button,
   message,
+  InputNumber,
+  Tooltip,
 } from "antd";
-
-import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { InfoCircleOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { getSchool } from "@/api/school";
 import { reqUserInfo } from "@/api/user";
 import { getKelas } from "@/api/kelas";
@@ -292,6 +293,10 @@ const AddBankSoalForm = ({ visible, onCancel, onOk, confirmLoading }) => {
         idAcp: values.idAcp,
         idAtp: values.idAtp,
         idSchool: values.idSchool,
+        // IRT 3PL parameters (opsional)
+        irtDiscrimination: values.irtDiscrimination || null,
+        irtDifficulty: values.irtDifficulty || null,
+        irtGuessing: values.irtGuessing || null,
       };
 
       console.log("Formatted payload:", payload); // For debugging
@@ -551,6 +556,91 @@ const AddBankSoalForm = ({ visible, onCancel, onOk, confirmLoading }) => {
                   )}
                 </>
               )}
+            </Row>
+          </TabPane>
+          <TabPane tab="Parameter IRT (3PL)" key="3">
+            <Row gutter={16}>
+              <Col xs={24} sm={24} md={24}>
+                <div style={{
+                  padding: "12px",
+                  background: "#e6f7ff",
+                  borderRadius: "6px",
+                  marginBottom: "16px",
+                  border: "1px solid #91d5ff"
+                }}>
+                  <p style={{ margin: 0, fontSize: "13px", color: "#0050b3" }}>
+                    <InfoCircleOutlined style={{ marginRight: 6 }} />
+                    <strong>Parameter IRT 3PL</strong> digunakan untuk Computerized Adaptive Testing (CAT).
+                    Nilai ini opsional — dapat diisi setelah kalibrasi soal.
+                  </p>
+                </div>
+              </Col>
+              <Col xs={24} sm={24} md={8}>
+                <Form.Item
+                  label={
+                    <span>
+                      Parameter <strong>a</strong> — Daya Pembeda&nbsp;
+                      <Tooltip title="Nilai antara 0.5–2.5. Semakin tinggi, soal semakin dapat membedakan kemampuan peserta.">
+                        <InfoCircleOutlined style={{ color: "#1890ff" }} />
+                      </Tooltip>
+                    </span>
+                  }
+                  name="irtDiscrimination"
+                >
+                  <InputNumber
+                    min={0}
+                    max={3}
+                    step={0.1}
+                    precision={3}
+                    placeholder="0.5 – 2.5"
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={24} md={8}>
+                <Form.Item
+                  label={
+                    <span>
+                      Parameter <strong>b</strong> — Tingkat Kesulitan&nbsp;
+                      <Tooltip title="Nilai antara -3 hingga 3. 0 = sedang, negatif = mudah, positif = sulit.">
+                        <InfoCircleOutlined style={{ color: "#1890ff" }} />
+                      </Tooltip>
+                    </span>
+                  }
+                  name="irtDifficulty"
+                >
+                  <InputNumber
+                    min={-4}
+                    max={4}
+                    step={0.1}
+                    precision={3}
+                    placeholder="-3 hingga 3"
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={24} md={8}>
+                <Form.Item
+                  label={
+                    <span>
+                      Parameter <strong>c</strong> — Peluang Menebak&nbsp;
+                      <Tooltip title="Nilai antara 0–0.35. Untuk PG 4 opsi ≈ 0.25, 5 opsi ≈ 0.20.">
+                        <InfoCircleOutlined style={{ color: "#1890ff" }} />
+                      </Tooltip>
+                    </span>
+                  }
+                  name="irtGuessing"
+                >
+                  <InputNumber
+                    min={0}
+                    max={0.5}
+                    step={0.01}
+                    precision={3}
+                    placeholder="0 – 0.35"
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
             </Row>
           </TabPane>
         </Tabs>

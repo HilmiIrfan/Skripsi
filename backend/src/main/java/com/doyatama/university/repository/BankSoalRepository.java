@@ -50,6 +50,10 @@ public class BankSoalRepository {
         columnMapping.put("atp", "atp");
         columnMapping.put("konsentrasiKeahlianSekolah", "konsentrasiKeahlianSekolah");
         columnMapping.put("school", "school");
+        // IRT 3PL parameters
+        columnMapping.put("irtDiscrimination", "irtDiscrimination");
+        columnMapping.put("irtDifficulty", "irtDifficulty");
+        columnMapping.put("irtGuessing", "irtGuessing");
 
         // Definisikan field yang menggunakan indeks
         Map<String, String> indexedFields = new HashMap<>();
@@ -100,6 +104,16 @@ public class BankSoalRepository {
         client.insertRecord(table, rowKey, "main", "bobot", bankSoal.getBobot());
         client.insertRecord(table, rowKey, "main", "jenisSoal", bankSoal.getJenisSoal());
         client.insertRecord(table, rowKey, "main", "createdAt", bankSoal.getCreatedAt().toString());
+        // IRT 3PL parameters
+        if (bankSoal.getIrtDiscrimination() != null) {
+            client.insertRecord(table, rowKey, "main", "irtDiscrimination", bankSoal.getIrtDiscrimination().toString());
+        }
+        if (bankSoal.getIrtDifficulty() != null) {
+            client.insertRecord(table, rowKey, "main", "irtDifficulty", bankSoal.getIrtDifficulty().toString());
+        }
+        if (bankSoal.getIrtGuessing() != null) {
+            client.insertRecord(table, rowKey, "main", "irtGuessing", bankSoal.getIrtGuessing().toString());
+        }
     }
 
     private void saveRelationships(HBaseCustomClient client, TableName table, String rowKey, BankSoal bankSoal) {
@@ -238,6 +252,10 @@ public class BankSoalRepository {
         columnMapping.put("atp", "atp");
         columnMapping.put("konsentrasiKeahlianSekolah", "konsentrasiKeahlianSekolah");
         columnMapping.put("school", "school");
+        // IRT 3PL parameters
+        columnMapping.put("irtDiscrimination", "irtDiscrimination");
+        columnMapping.put("irtDifficulty", "irtDifficulty");
+        columnMapping.put("irtGuessing", "irtGuessing");
 
         Map<String, String> indexedFields = new HashMap<>();
         indexedFields.put("opsi", "MAP");
@@ -275,6 +293,10 @@ public class BankSoalRepository {
         columnMapping.put("atp", "atp");
         columnMapping.put("konsentrasiKeahlianSekolah", "konsentrasiKeahlianSekolah");
         columnMapping.put("school", "school");
+        // IRT 3PL parameters
+        columnMapping.put("irtDiscrimination", "irtDiscrimination");
+        columnMapping.put("irtDifficulty", "irtDifficulty");
+        columnMapping.put("irtGuessing", "irtGuessing");
 
         Map<String, String> indexedFields = new HashMap<>();
         indexedFields.put("opsi", "MAP");
@@ -326,6 +348,10 @@ public class BankSoalRepository {
         columnMapping.put("atp", "atp");
         columnMapping.put("konsentrasiKeahlianSekolah", "konsentrasiKeahlianSekolah");
         columnMapping.put("school", "school");
+        // IRT 3PL parameters
+        columnMapping.put("irtDiscrimination", "irtDiscrimination");
+        columnMapping.put("irtDifficulty", "irtDifficulty");
+        columnMapping.put("irtGuessing", "irtGuessing");
 
         // Definisikan field yang menggunakan indeks
         Map<String, String> indexedFields = new HashMap<>();
@@ -439,6 +465,16 @@ public class BankSoalRepository {
         client.insertRecord(table, rowKey, "main", "bobot", bankSoal.getBobot());
         client.insertRecord(table, rowKey, "main", "jenisSoal", bankSoal.getJenisSoal());
         client.insertRecord(table, rowKey, "main", "createdAt", bankSoal.getCreatedAt().toString());
+        // IRT 3PL parameters
+        if (bankSoal.getIrtDiscrimination() != null) {
+            client.insertRecord(table, rowKey, "main", "irtDiscrimination", bankSoal.getIrtDiscrimination().toString());
+        }
+        if (bankSoal.getIrtDifficulty() != null) {
+            client.insertRecord(table, rowKey, "main", "irtDifficulty", bankSoal.getIrtDifficulty().toString());
+        }
+        if (bankSoal.getIrtGuessing() != null) {
+            client.insertRecord(table, rowKey, "main", "irtGuessing", bankSoal.getIrtGuessing().toString());
+        }
     }
 
     private void updateRelationshipsBankSoal(HBaseCustomClient client, TableName table, String rowKey,

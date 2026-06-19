@@ -114,6 +114,13 @@ public class HasilUjian {
     private List<String> violationIds; // Menyimpan ID pelanggaran dari CheatDetection
     private List<CheatDetection> cheatDetections; // (opsional) Menyimpan objek CheatDetection
 
+    // IRT 3PL Adaptive Testing Results
+    private Double irtThetaEstimate;         // Estimasi kemampuan akhir peserta (skala logit)
+    private Double irtScaledScore;           // Skor yang di-scaled 0-100 berdasarkan theta
+    private String irtProficiencyLevel;      // Tingkat kemampuan: ADVANCED, PROFICIENT, BASIC, NEEDS_SUPPORT
+    private List<String> irtAdministeredQuestions; // ID soal yang diberikan selama CAT
+    private Double irtFinalStandardError;    // Standar error estimasi akhir
+
     // Constructors
     public HasilUjian() {
         this.jawabanPeserta = new HashMap<>();
@@ -1061,6 +1068,48 @@ public class HasilUjian {
         this.consistencyScore = mean > 0 ? Math.max(0.0, 1.0 - (stdDev / mean)) : 0.0;
     }
 
+    // ==================== IRT 3PL ADAPTIVE TESTING GETTERS &amp; SETTERS ====================
+
+    public Double getIrtThetaEstimate() {
+        return irtThetaEstimate;
+    }
+
+    public void setIrtThetaEstimate(Double irtThetaEstimate) {
+        this.irtThetaEstimate = irtThetaEstimate;
+    }
+
+    public Double getIrtScaledScore() {
+        return irtScaledScore;
+    }
+
+    public void setIrtScaledScore(Double irtScaledScore) {
+        this.irtScaledScore = irtScaledScore;
+    }
+
+    public String getIrtProficiencyLevel() {
+        return irtProficiencyLevel;
+    }
+
+    public void setIrtProficiencyLevel(String irtProficiencyLevel) {
+        this.irtProficiencyLevel = irtProficiencyLevel;
+    }
+
+    public List<String> getIrtAdministeredQuestions() {
+        return irtAdministeredQuestions;
+    }
+
+    public void setIrtAdministeredQuestions(List<String> irtAdministeredQuestions) {
+        this.irtAdministeredQuestions = irtAdministeredQuestions;
+    }
+
+    public Double getIrtFinalStandardError() {
+        return irtFinalStandardError;
+    }
+
+    public void setIrtFinalStandardError(Double irtFinalStandardError) {
+        this.irtFinalStandardError = irtFinalStandardError;
+    }
+
     @Override
     public String toString() {
         return "HasilUjian{" +
@@ -1071,6 +1120,8 @@ public class HasilUjian {
                 ", persentase=" + persentase +
                 ", nilaiHuruf='" + nilaiHuruf + '\'' +
                 ", lulus=" + lulus +
+                ", irtThetaEstimate=" + irtThetaEstimate +
+                ", irtProficiencyLevel='" + irtProficiencyLevel + '\'' +
                 '}';
     }
-}
+}

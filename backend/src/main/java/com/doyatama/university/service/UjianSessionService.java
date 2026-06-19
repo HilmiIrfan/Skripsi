@@ -58,6 +58,9 @@ public class UjianSessionService {
     @Autowired
     private HasilUjianService hasilUjianService; // TAMBAHAN
 
+    @Autowired
+    private CatIrtService catIrtService; // IRT 3PL CAT
+
     // ==================== SESSION MANAGEMENT ====================
 
     /**
@@ -163,6 +166,13 @@ public class UjianSessionService {
         // Save session
         UjianSession savedSession = ujianSessionRepository.save(session);
 
+        // Inisialisasi CAT jika mode adaptif aktif
+        if (Boolean.TRUE.equals(ujian.getIsCatEnabled())) {
+            catIrtService.initializeSession(savedSession, ujian);
+            ujianSessionRepository.save(savedSession);
+            logger.info("CAT session initialized for session: {}", savedSession.getSessionId());
+        }
+
         logger.info("Session started successfully: {}", savedSession.getSessionId());
         return savedSession;
     }
@@ -191,6 +201,14 @@ public class UjianSessionService {
         // Update currentSoalIndex jika ada
         if (request.getCurrentSoalIndex() != null) {
             session.setCurrentSoalIndex(request.getCurrentSoalIndex());
+        }
+
+        // Update estimasi IRT dan pilih soal berikutnya jika mode CAT aktif
+        if (session.getUjian() != null && Boolean.TRUE.equals(session.getUjian().getIsCatEnabled())) {
+            catIrtService.updateSessionEstimate(session, session.getUjian());
+            logger.debug("CAT updated: theta={}, SE={}, nextQuestion={}",
+                    session.getThetaEstimate(), session.getStandardError(),
+                    session.getCurrentAdaptiveQuestionId());
         }
 
         // Update waktu update
@@ -229,6 +247,11 @@ public class UjianSessionService {
         // Update timeRemaining
         if (request.getTimeRemaining() != null) {
             session.setTimeRemaining(request.getTimeRemaining());
+        }
+
+        // Update estimasi IRT jika mode CAT aktif
+        if (session.getUjian() != null && Boolean.TRUE.equals(session.getUjian().getIsCatEnabled())) {
+            catIrtService.updateSessionEstimate(session, session.getUjian());
         }
 
         session.autoSave();

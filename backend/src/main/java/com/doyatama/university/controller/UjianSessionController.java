@@ -201,12 +201,29 @@ public class UjianSessionController {
             responseData.put("lastUpdated", session.getUpdatedAt());
             responseData.put("progressPercentage", session.getProgressPercentage());
 
+            // Data CAT/IRT jika mode adaptif aktif
+            if (session.getUjian() != null && Boolean.TRUE.equals(session.getUjian().getIsCatEnabled())) {
+                responseData.put("isCatMode", true);
+                responseData.put("nextQuestionId", session.getCurrentAdaptiveQuestionId());
+                responseData.put("thetaEstimate", session.getThetaEstimate());
+                responseData.put("standardError", session.getStandardError());
+                // Ambil data dari adaptiveMetadata
+                if (session.getAdaptiveMetadata() != null) {
+                    responseData.put("scaledScore", session.getAdaptiveMetadata().get("scaledScore"));
+                    responseData.put("proficiencyLevel", session.getAdaptiveMetadata().get("proficiencyLevel"));
+                    responseData.put("shouldStop", session.getCurrentAdaptiveQuestionId() == null);
+                }
+            } else {
+                responseData.put("isCatMode", false);
+            }
+
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "Jawaban berhasil disimpan");
             response.put("data", responseData);
 
             return ResponseEntity.ok().body(response);
+
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()

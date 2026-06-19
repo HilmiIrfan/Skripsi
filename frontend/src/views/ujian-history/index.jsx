@@ -658,6 +658,71 @@ const UjianHistory = () => {
                 })()}
               </Descriptions.Item>
             </Descriptions>
+
+            {/* IRT / CAT Results Section */}
+            {selectedHistory.thetaEstimate != null && (
+              <>
+                <Divider orientation="left">🧠 Hasil Computerized Adaptive Testing (IRT 3PL)</Divider>
+                <div style={{
+                  background: "linear-gradient(135deg, #e6f7ff, #f0f5ff)",
+                  border: "1px solid #91d5ff",
+                  borderRadius: "8px",
+                  padding: "16px",
+                  marginBottom: 16,
+                }}>
+                  <Row gutter={[16, 12]}>
+                    <Col xs={24} sm={12} md={6}>
+                      <div style={{ textAlign: "center" }}>
+                        <div style={{ fontSize: "11px", color: "#888", marginBottom: 4 }}>Estimasi Kemampuan (θ)</div>
+                        <div style={{ fontSize: "20px", fontWeight: 700, color: "#1890ff" }}>
+                          {selectedHistory.thetaEstimate?.toFixed(3)}
+                        </div>
+                        <div style={{ fontSize: "10px", color: "#aaa" }}>Skala Logit</div>
+                      </div>
+                    </Col>
+                    <Col xs={24} sm={12} md={6}>
+                      <div style={{ textAlign: "center" }}>
+                        <div style={{ fontSize: "11px", color: "#888", marginBottom: 4 }}>Skor Terukur</div>
+                        <div style={{ fontSize: "20px", fontWeight: 700, color: "#52c41a" }}>
+                          {selectedHistory.scaledScore?.toFixed(1) || "-"}
+                        </div>
+                        <div style={{ fontSize: "10px", color: "#aaa" }}>Skala 0–100</div>
+                      </div>
+                    </Col>
+                    <Col xs={24} sm={12} md={6}>
+                      <div style={{ textAlign: "center" }}>
+                        <div style={{ fontSize: "11px", color: "#888", marginBottom: 4 }}>Level Kemampuan</div>
+                        <Tag
+                          color={
+                            selectedHistory.proficiencyLevel === "ADVANCED" ? "green" :
+                            selectedHistory.proficiencyLevel === "PROFICIENT" ? "blue" :
+                            selectedHistory.proficiencyLevel === "BASIC" ? "orange" : "red"
+                          }
+                          style={{ fontSize: "13px", padding: "3px 10px", marginTop: 2 }}
+                        >
+                          {selectedHistory.proficiencyLevel || "-"}
+                        </Tag>
+                      </div>
+                    </Col>
+                    <Col xs={24} sm={12} md={6}>
+                      <div style={{ textAlign: "center" }}>
+                        <div style={{ fontSize: "11px", color: "#888", marginBottom: 4 }}>Soal CAT Diberikan</div>
+                        <div style={{ fontSize: "20px", fontWeight: 700, color: "#722ed1" }}>
+                          {selectedHistory.administeredQuestions?.length || "-"}
+                        </div>
+                        <div style={{ fontSize: "10px", color: "#aaa" }}>Soal Adaptif</div>
+                      </div>
+                    </Col>
+                  </Row>
+                  {selectedHistory.finalStandardError != null && (
+                    <div style={{ marginTop: 8, textAlign: "center", fontSize: "11px", color: "#888" }}>
+                      Standard Error Estimasi Akhir: <strong>{selectedHistory.finalStandardError?.toFixed(3)}</strong>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
             {/* Analytics Section */}
             {(selectedHistory.rataRataKelas ||
               selectedHistory.persentilSiswa ||

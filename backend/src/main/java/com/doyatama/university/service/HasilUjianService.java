@@ -309,6 +309,44 @@ public class HasilUjianService {
         // Hitung skor dan lakukan analisis
         calculateScoresAndAnalysis(hasilUjian);
 
+        // TAMBAHAN: Salin data IRT dari sesi ke hasil ujian jika mode CAT aktif
+        if (session.getAdaptiveMetadata() != null && !session.getAdaptiveMetadata().isEmpty()) {
+            try {
+                Map<String, Object> meta = session.getAdaptiveMetadata();
+
+                Object thetaObj = meta.get("thetaEstimate");
+                if (thetaObj instanceof Number) {
+                    hasilUjian.setIrtThetaEstimate(((Number) thetaObj).doubleValue());
+                }
+
+                Object scaledObj = meta.get("scaledScore");
+                if (scaledObj instanceof Number) {
+                    hasilUjian.setIrtScaledScore(((Number) scaledObj).doubleValue());
+                }
+
+                Object proficiencyObj = meta.get("proficiencyLevel");
+                if (proficiencyObj instanceof String) {
+                    hasilUjian.setIrtProficiencyLevel((String) proficiencyObj);
+                }
+
+                Object seObj = meta.get("standardError");
+                if (seObj instanceof Number) {
+                    hasilUjian.setIrtFinalStandardError(((Number) seObj).doubleValue());
+                }
+
+                // Salin daftar soal yang diberikan selama CAT
+                if (session.getAdministeredQuestionIds() != null) {
+                    hasilUjian.setIrtAdministeredQuestions(new java.util.ArrayList<>(session.getAdministeredQuestionIds()));
+                }
+
+                logger.info("IRT data copied to HasilUjian: theta={}, proficiency={}, administeredQuestions={}",
+                        hasilUjian.getIrtThetaEstimate(), hasilUjian.getIrtProficiencyLevel(),
+                        hasilUjian.getIrtAdministeredQuestions() != null ? hasilUjian.getIrtAdministeredQuestions().size() : 0);
+            } catch (Exception e) {
+                logger.warn("Error copying IRT data from session {}: {}", sessionId, e.getMessage());
+            }
+        }
+
         // Evaluasi status keamanan (sudah include violations)
         evaluateSecurityStatus(hasilUjian);
 
@@ -321,6 +359,7 @@ public class HasilUjianService {
             metadata.put("autoSubmitReason", autoSubmitReason);
             hasilUjian.setMetadata(metadata);
         }
+
 
         // PERBAIKAN: Log data before saving
         logger.debug("Saving HasilUjian - idHasilUjian: {}, idUjian: {}, idPeserta: {}, idSchool: {}",

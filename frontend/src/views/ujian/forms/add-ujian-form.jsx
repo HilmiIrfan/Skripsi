@@ -421,6 +421,11 @@ const AddUjianForm = ({ visible, onCancel, onOk, confirmLoading }) => {
           timezone: values.timezone || "Asia/Jakarta",
           showTimer: showTimerToParticipants,
           preventCheating: preventCheating,
+          // Parameter CAT dari form
+          minQuestions: values.catMinQuestions || 5,
+          maxQuestions: values.catMaxQuestions || 20,
+          targetSE: values.catTargetSE || 0.3,
+          initialTheta: values.catInitialTheta || 0.0,
         },
 
         // Late start settings
@@ -853,6 +858,88 @@ const AddUjianForm = ({ visible, onCancel, onOk, confirmLoading }) => {
 
             {/* Tampilkan informasi relasi jika ada bank soal yang dipilih */}
             {renderRelationInfo()}
+
+            {/* CAT Settings Card */}
+            <Card
+              title={
+                <span style={{ color: "#1890ff" }}>
+                  🧠 Pengaturan CAT (Computerized Adaptive Testing)
+                </span>
+              }
+              size="small"
+              style={{ marginTop: 16, borderColor: isCatEnabled ? "#1890ff" : "#d9d9d9" }}
+              extra={
+                <Switch
+                  checked={isCatEnabled}
+                  onChange={setIsCatEnabled}
+                  checkedChildren="Aktif"
+                  unCheckedChildren="Nonaktif"
+                />
+              }
+            >
+              {isCatEnabled ? (
+                <>
+                  <div style={{
+                    padding: "8px 12px",
+                    background: "#e6f7ff",
+                    border: "1px solid #91d5ff",
+                    borderRadius: "4px",
+                    marginBottom: "12px",
+                    fontSize: "12px",
+                    color: "#0050b3"
+                  }}>
+                    ✅ Mode CAT aktif. Soal akan dipilih secara adaptif berdasarkan kemampuan peserta (IRT 3PL).
+                    Pastikan soal telah memiliki parameter a, b, c di Bank Soal.
+                  </div>
+                  <Row gutter={16}>
+                    <Col xs={24} sm={12} md={6}>
+                      <Form.Item
+                        label="Min Soal CAT:"
+                        name="catMinQuestions"
+                        initialValue={5}
+                        help="Minimal soal sebelum stopping rule"
+                      >
+                        <InputNumber min={3} max={50} style={{ width: "100%" }} />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={12} md={6}>
+                      <Form.Item
+                        label="Max Soal CAT:"
+                        name="catMaxQuestions"
+                        initialValue={20}
+                        help="Maksimal soal yang diberikan"
+                      >
+                        <InputNumber min={5} max={100} style={{ width: "100%" }} />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={12} md={6}>
+                      <Form.Item
+                        label="Target SE:"
+                        name="catTargetSE"
+                        initialValue={0.3}
+                        help="Target Std Error (stopping rule, 0.1-0.5)"
+                      >
+                        <InputNumber min={0.1} max={0.9} step={0.05} precision={2} style={{ width: "100%" }} />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={12} md={6}>
+                      <Form.Item
+                        label="Theta Awal:"
+                        name="catInitialTheta"
+                        initialValue={0.0}
+                        help="Estimasi theta awal (-2 s/d 2)"
+                      >
+                        <InputNumber min={-3} max={3} step={0.5} precision={1} style={{ width: "100%" }} />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </>
+              ) : (
+                <div style={{ color: "#999", fontSize: "13px", textAlign: "center", padding: "12px 0" }}>
+                  Mode ujian konvensional — semua soal ditampilkan secara berurutan atau acak.
+                </div>
+              )}
+            </Card>
           </Form>
         </TabPane>
 
