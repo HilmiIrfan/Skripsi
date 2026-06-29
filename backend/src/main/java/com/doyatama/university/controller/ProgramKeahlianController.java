@@ -38,14 +38,16 @@ public class ProgramKeahlianController {
     private ProgramKeahlianService programKeahlianService = new ProgramKeahlianService();
 
     @GetMapping
-    public PagedResponse<ProgramKeahlian> getProgramKeahlians(@RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
-                                                    @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size,
-                                                    @RequestParam(value = "bidangId", defaultValue = "*") String bidangId) throws IOException {
+    public PagedResponse<ProgramKeahlian> getProgramKeahlians(
+            @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size,
+            @RequestParam(value = "bidangId", defaultValue = "*") String bidangId) throws IOException {
         return programKeahlianService.getAllProgramKeahlian(page, size, bidangId);
     }
 
     @PostMapping
-    public ResponseEntity<?> createProgramKeahlian(@Valid @RequestBody ProgramKeahlianRequest programKeahlianRequest) throws IOException {
+    public ResponseEntity<?> createProgramKeahlian(@Valid @RequestBody ProgramKeahlianRequest programKeahlianRequest)
+            throws IOException {
         ProgramKeahlian programKeahlian = programKeahlianService.createProgramKeahlian(programKeahlianRequest);
 
         URI location = ServletUriComponentsBuilder
@@ -57,17 +59,16 @@ public class ProgramKeahlianController {
     }
 
     @GetMapping("/{programKeahlianId}")
-    public DefaultResponse<ProgramKeahlian> getProgramKeahlianById(@PathVariable String programKeahlianId) throws IOException {
+    public DefaultResponse<ProgramKeahlian> getProgramKeahlianById(@PathVariable String programKeahlianId)
+            throws IOException {
         return programKeahlianService.getProgramKeahlianById(programKeahlianId);
     }
-    
-
-
 
     @PutMapping("/{programKeahlianId}")
     public ResponseEntity<?> updateProgramKeahlian(@PathVariable String programKeahlianId,
-                                              @Valid @RequestBody ProgramKeahlianRequest programKeahlianRequest) throws IOException {
-        ProgramKeahlian programKeahlian = programKeahlianService.updateProgramKeahlian(programKeahlianId, programKeahlianRequest);
+            @Valid @RequestBody ProgramKeahlianRequest programKeahlianRequest) throws IOException {
+        ProgramKeahlian programKeahlian = programKeahlianService.updateProgramKeahlian(programKeahlianId,
+                programKeahlianRequest);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{programKeahlianId}")
@@ -78,23 +79,29 @@ public class ProgramKeahlianController {
     }
 
     @DeleteMapping("/{programKeahlianId}")
-    public HttpStatus deleteProgramKeahlian(@PathVariable (value = "programKeahlianId") String programKeahlianId) throws IOException {
+    public HttpStatus deleteProgramKeahlian(@PathVariable(value = "programKeahlianId") String programKeahlianId)
+            throws IOException {
         programKeahlianService.deleteProgramKeahlianById(programKeahlianId);
         return HttpStatus.FORBIDDEN;
     }
 }
 
-
-
-//    @PutMapping("/{programKeahlianId}")
-//public ResponseEntity<?> updateProgramKeahlian(@PathVariable String programKeahlianid,
-//                                              @Valid @RequestBody ProgramKeahlianRequest programKeahlianRequest) throws IOException {
-//    ProgramKeahlian updatedProgramKeahlian = programKeahlianService.updateProgramKeahlian(programKeahlianid, programKeahlianRequest);
-//    return ResponseEntity.ok(new ApiResponse(true, "ProgramKeahlian Updated Successfully"));
-//}
+// @PutMapping("/{programKeahlianId}")
+// public ResponseEntity<?> updateProgramKeahlian(@PathVariable String
+// programKeahlianid,
+// @Valid @RequestBody ProgramKeahlianRequest programKeahlianRequest) throws
+// IOException {
+// ProgramKeahlian updatedProgramKeahlian =
+// programKeahlianService.updateProgramKeahlian(programKeahlianid,
+// programKeahlianRequest);
+// return ResponseEntity.ok(new ApiResponse(true, "ProgramKeahlian Updated
+// Successfully"));
+// }
 //
-//@DeleteMapping("/{programKeahlianId}")
-//public ResponseEntity<?> deleteProgramKeahlian(@PathVariable String programKeahlianId) throws IOException {
-//    programKeahlianService.deleteProgramKeahlianById(programKeahlianId);
-//    return new ResponseEntity<>(new ApiResponse(true, "ProgramKeahlian Deleted Successfully"), HttpStatus.OK);
-//}
+// @DeleteMapping("/{programKeahlianId}")
+// public ResponseEntity<?> deleteProgramKeahlian(@PathVariable String
+// programKeahlianId) throws IOException {
+// programKeahlianService.deleteProgramKeahlianById(programKeahlianId);
+// return new ResponseEntity<>(new ApiResponse(true, "ProgramKeahlian Deleted
+// Successfully"), HttpStatus.OK);
+// }

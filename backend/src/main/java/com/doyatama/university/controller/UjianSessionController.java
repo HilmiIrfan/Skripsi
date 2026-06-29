@@ -203,15 +203,24 @@ public class UjianSessionController {
 
             // Data CAT/IRT jika mode adaptif aktif
             if (session.getUjian() != null && Boolean.TRUE.equals(session.getUjian().getIsCatEnabled())) {
+                // Cek apakah jawaban yang baru disimpan benar atau salah
+                boolean answerCorrect = ujianSessionService.checkLastAnswerCorrect(
+                        session.getUjian(), request.getIdBankSoal(), request.getJawaban());
+                boolean stopDueToWrong = !answerCorrect; // Berhenti jika jawaban salah
+
                 responseData.put("isCatMode", true);
-                responseData.put("nextQuestionId", session.getCurrentAdaptiveQuestionId());
+                responseData.put("isAnswerCorrect", answerCorrect);
+                responseData.put("shouldStopDueToWrongAnswer", stopDueToWrong);
+                responseData.put("nextQuestionId", stopDueToWrong ? null : session.getCurrentAdaptiveQuestionId());
                 responseData.put("thetaEstimate", session.getThetaEstimate());
                 responseData.put("standardError", session.getStandardError());
                 // Ambil data dari adaptiveMetadata
                 if (session.getAdaptiveMetadata() != null) {
                     responseData.put("scaledScore", session.getAdaptiveMetadata().get("scaledScore"));
                     responseData.put("proficiencyLevel", session.getAdaptiveMetadata().get("proficiencyLevel"));
-                    responseData.put("shouldStop", session.getCurrentAdaptiveQuestionId() == null);
+                    responseData.put("shouldStop", stopDueToWrong || session.getCurrentAdaptiveQuestionId() == null);
+                } else {
+                    responseData.put("shouldStop", stopDueToWrong);
                 }
             } else {
                 responseData.put("isCatMode", false);

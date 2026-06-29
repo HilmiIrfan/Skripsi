@@ -61,6 +61,10 @@ public class UjianSessionService {
     @Autowired
     private CatIrtService catIrtService; // IRT 3PL CAT
 
+    // Instansiasi langsung (konsisten dengan pattern UjianService)
+    private final com.doyatama.university.repository.BankSoalRepository bankSoalRepository =
+            new com.doyatama.university.repository.BankSoalRepository();
+
     // ==================== SESSION MANAGEMENT ====================
 
     /**
@@ -216,6 +220,47 @@ public class UjianSessionService {
 
         // Simpan session
         return ujianSessionRepository.save(session);
+    }
+
+    /**
+     * Cek apakah jawaban untuk soal tertentu benar (digunakan oleh controller untuk CAT stopping rule).
+     * CATATAN: session.getUjian() hanya memuat data parsial dari HBase (tanpa bankSoalList/jawabanBenar),
+     * sehingga kita harus me-load Ujian penuh dari ujianRepository atau langsung dari bankSoalRepository.
+     */
+    public boolean checkLastAnswerCorrect(com.doyatama.university.model.Ujian partialUjian, String idBankSoal, Object answer) {
+        if (partialUjian == null || partialUjian.getIdUjian() == null || idBankSoal == null) {
+            logger.warn("[CAT] checkLastAnswerCorrect: parameter null");
+            return false;
+        }
+        try {
+            // Strategi 1: Load BankSoal langsung dari bankSoalRepository (paling akurat)
+            com.doyatama.university.model.BankSoal bankSoal = bankSoalRepository.findById(idBankSoal);
+            if (bankSoal != null && bankSoal.getJawabanBenar() != null && !bankSoal.getJawabanBenar().isEmpty()) {
+                com.doyatama.university.model.BankSoalUjian item = new com.doyatama.university.model.BankSoalUjian(bankSoal);
+                boolean correct = catIrtService.evaluateAnswer(item, answer);
+                logger.debug("[CAT] Evaluasi langsung dari BankSoal: soal={} jawaban={} benar={}", idBankSoal, answer, correct);
+                return correct;
+            }
+
+            // Strategi 2: Coba dari bankSoalList di Ujian penuh (fallback)
+            com.doyatama.university.model.Ujian fullUjian = ujianRepository.findById(partialUjian.getIdUjian());
+            if (fullUjian != null && fullUjian.getBankSoalList() != null) {
+                for (com.doyatama.university.model.BankSoalUjian item : fullUjian.getBankSoalList()) {
+                    if (item != null && idBankSoal.equals(item.getIdBankSoal())
+                            && item.getJawabanBenar() != null && !item.getJawabanBenar().isEmpty()) {
+                        boolean correct = catIrtService.evaluateAnswer(item, answer);
+                        logger.debug("[CAT] Evaluasi dari bankSoalList Ujian: soal={} jawaban={} benar={}", idBankSoal, answer, correct);
+                        return correct;
+                    }
+                }
+            }
+
+            logger.warn("[CAT] jawabanBenar tidak ditemukan untuk soal: {}. Jawaban tidak dapat dievaluasi.", idBankSoal);
+            return false;
+        } catch (Exception e) {
+            logger.error("[CAT] checkLastAnswerCorrect error untuk soal {}: {}", idBankSoal, e.getMessage(), e);
+            return false;
+        }
     }
 
     /**

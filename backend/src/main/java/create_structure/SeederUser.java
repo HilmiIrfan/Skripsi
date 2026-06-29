@@ -72,9 +72,9 @@ public class SeederUser {
         client.insertRecord(tableUser, "USR004", "detail", "created_by", "Doyatama");
 
         client.insertRecord(tableUser, "USR005", "main", "id", "USR005");
-        client.insertRecord(tableUser, "USR005", "main", "email", "murid@gmail.com");
-        client.insertRecord(tableUser, "USR005", "main", "name", "Murid SMK Rowokangkung");
-        client.insertRecord(tableUser, "USR005", "main", "username", "muridsmk1");
+        client.insertRecord(tableUser, "USR005", "main", "email", "johndoe@gmail.com");
+        client.insertRecord(tableUser, "USR005", "main", "name", "John Doe");
+        client.insertRecord(tableUser, "USR005", "main", "username", "johndoe1");
         client.insertRecord(tableUser, "USR005", "main", "password",
                 "$2a$10$SDRWMUk.2fnli0GTmqodJexjRksTw0En98dU8fdKsw7nTbZzMrj.2"); // password
         client.insertRecord(tableUser, "USR005", "school", "idSchool", "RWK001");
@@ -82,5 +82,29 @@ public class SeederUser {
         client.insertRecord(tableUser, "USR005", "main", "roles", "5");
         client.insertRecord(tableUser, "USR005", "main", "created_at", Instant.now().toString());
         client.insertRecord(tableUser, "USR005", "detail", "created_by", "Doyatama");
+
+        client.insertRecord(tableUser, "USR006", "main", "id", "USR006");
+        client.insertRecord(tableUser, "USR006", "main", "email", "aprilia@gmail.com");
+        client.insertRecord(tableUser, "USR006", "main", "name", "Aprilia");
+        client.insertRecord(tableUser, "USR006", "main", "username", "april1");
+        client.insertRecord(tableUser, "USR006", "main", "password",
+                "$2a$10$SDRWMUk.2fnli0GTmqodJexjRksTw0En98dU8fdKsw7nTbZzMrj.2"); // password
+        client.insertRecord(tableUser, "USR006", "school", "idSchool", "RWK001");
+        client.insertRecord(tableUser, "USR006", "school", "nameSchool", "SMK Negeri 01 ROWOKANGKUNG");
+        client.insertRecord(tableUser, "USR006", "main", "roles", "5");
+        client.insertRecord(tableUser, "USR006", "main", "created_at", Instant.now().toString());
+        client.insertRecord(tableUser, "USR006", "detail", "created_by", "Doyatama");
+
+        client.insertRecord(tableUser, "USR007", "main", "id", "USR007");
+        client.insertRecord(tableUser, "USR007", "main", "email", "abdul@gmail.com");
+        client.insertRecord(tableUser, "USR007", "main", "name", "Abdul Rahmat");
+        client.insertRecord(tableUser, "USR007", "main", "username", "abdul1");
+        client.insertRecord(tableUser, "USR007", "main", "password",
+                "$2a$10$SDRWMUk.2fnli0GTmqodJexjRksTw0En98dU8fdKsw7nTbZzMrj.2"); // password
+        client.insertRecord(tableUser, "USR007", "school", "idSchool", "RWK001");
+        client.insertRecord(tableUser, "USR007", "school", "nameSchool", "SMK Negeri 01 ROWOKANGKUNG");
+        client.insertRecord(tableUser, "USR007", "main", "roles", "5");
+        client.insertRecord(tableUser, "USR007", "main", "created_at", Instant.now().toString());
+        client.insertRecord(tableUser, "USR007", "detail", "created_by", "Doyatama");
     }
 }

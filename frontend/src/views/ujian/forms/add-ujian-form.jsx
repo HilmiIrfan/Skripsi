@@ -421,9 +421,8 @@ const AddUjianForm = ({ visible, onCancel, onOk, confirmLoading }) => {
           timezone: values.timezone || "Asia/Jakarta",
           showTimer: showTimerToParticipants,
           preventCheating: preventCheating,
-          // Parameter CAT dari form
-          minQuestions: values.catMinQuestions || 5,
-          maxQuestions: values.catMaxQuestions || 20,
+          // maxQuestions otomatis mengikuti jumlahSoal
+          maxQuestions: convertUndefinedToNull(values.jumlahSoalDitampilkan, totalSoalAvailable),
           targetSE: values.catTargetSE || 0.3,
           initialTheta: values.catInitialTheta || 0.0,
         },
@@ -891,38 +890,50 @@ const AddUjianForm = ({ visible, onCancel, onOk, confirmLoading }) => {
                     ✅ Mode CAT aktif. Soal akan dipilih secara adaptif berdasarkan kemampuan peserta (IRT 3PL).
                     Pastikan soal telah memiliki parameter a, b, c di Bank Soal.
                   </div>
+                  <div style={{
+                    padding: "8px 12px",
+                    background: "#fff7e6",
+                    border: "1px solid #ffd591",
+                    borderRadius: "4px",
+                    marginBottom: "12px",
+                    fontSize: "12px",
+                    color: "#ad6800",
+                  }}>
+                    ⚡ <strong>Aturan Berhenti:</strong> Ujian otomatis berhenti saat siswa menjawab soal dengan
+                    jawaban salah. Jika semua jawaban benar, soal akan terus diberikan hingga
+                    mencapai Jumlah Soal Ditampilkan.
+                  </div>
                   <Row gutter={16}>
-                    <Col xs={24} sm={12} md={6}>
-                      <Form.Item
-                        label="Min Soal CAT:"
-                        name="catMinQuestions"
-                        initialValue={5}
-                        help="Minimal soal sebelum stopping rule"
-                      >
-                        <InputNumber min={3} max={50} style={{ width: "100%" }} />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} sm={12} md={6}>
+                    <Col xs={24} sm={12} md={8}>
                       <Form.Item
                         label="Max Soal CAT:"
-                        name="catMaxQuestions"
-                        initialValue={20}
-                        help="Maksimal soal yang diberikan"
+                        help="Otomatis mengikuti Jumlah Soal Ditampilkan"
                       >
-                        <InputNumber min={5} max={100} style={{ width: "100%" }} />
+                        <div style={{
+                          padding: "4px 11px",
+                          background: "#f5f5f5",
+                          border: "1px solid #d9d9d9",
+                          borderRadius: "6px",
+                          color: "#666",
+                          fontSize: "13px",
+                          minHeight: "32px",
+                          lineHeight: "22px",
+                        }}>
+                          Sama dengan &quot;Jumlah Soal Ditampilkan&quot; (otomatis)
+                        </div>
                       </Form.Item>
                     </Col>
-                    <Col xs={24} sm={12} md={6}>
+                    <Col xs={24} sm={12} md={8}>
                       <Form.Item
                         label="Target SE:"
                         name="catTargetSE"
                         initialValue={0.3}
-                        help="Target Std Error (stopping rule, 0.1-0.5)"
+                        help="Target Std Error (0.1-0.5)"
                       >
                         <InputNumber min={0.1} max={0.9} step={0.05} precision={2} style={{ width: "100%" }} />
                       </Form.Item>
                     </Col>
-                    <Col xs={24} sm={12} md={6}>
+                    <Col xs={24} sm={12} md={8}>
                       <Form.Item
                         label="Theta Awal:"
                         name="catInitialTheta"

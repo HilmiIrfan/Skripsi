@@ -198,18 +198,28 @@ public class CatIrtService {
 
         Map<String, Object> settings = ujian.getCatSettings() != null ? ujian.getCatSettings() : new HashMap<>();
         int answered = session.getAnsweredQuestions() != null ? session.getAnsweredQuestions() : 0;
-        int minQuestions = getInt(settings, "minQuestions", 5);
         int maxQuestions = getInt(settings, "maxQuestions",
                 ujian.getJumlahSoal() != null ? ujian.getJumlahSoal() : answered);
-        double targetStandardError = getDouble(settings, "targetStandardError", 0.3);
 
-        if (maxQuestions > 0 && answered >= maxQuestions) {
-            return true;
+        // Berhenti jika sudah menjawab sejumlah maxQuestions
+        return maxQuestions > 0 && answered >= maxQuestions;
+    }
+
+    /**
+     * Cek apakah jawaban untuk soal tertentu BENAR.
+     * Digunakan sebagai stopping rule utama di CAT mode:
+     * jika jawaban SALAH → ujian langsung berhenti.
+     */
+    public boolean isAnswerCorrect(Ujian ujian, String idBankSoal, Object answer) {
+        if (ujian == null || ujian.getBankSoalList() == null || idBankSoal == null) {
+            return false;
         }
-
-        return answered >= minQuestions
-                && session.getStandardError() != null
-                && session.getStandardError() <= targetStandardError;
+        for (com.doyatama.university.model.BankSoalUjian item : ujian.getBankSoalList()) {
+            if (item != null && idBankSoal.equals(item.getIdBankSoal())) {
+                return evaluateAnswer(item, answer);
+            }
+        }
+        return false;
     }
 
     public double probability(double theta, BankSoalUjian item) {

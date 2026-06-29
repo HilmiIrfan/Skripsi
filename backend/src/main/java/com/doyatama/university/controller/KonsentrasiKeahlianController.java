@@ -38,15 +38,18 @@ public class KonsentrasiKeahlianController {
     private KonsentrasiKeahlianService konsentrasiKeahlianService = new KonsentrasiKeahlianService();
 
     @GetMapping
-    public PagedResponse<KonsentrasiKeahlian> getKonsentrasiKeahlians(@RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
-                                                    @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size,
-                                                    @RequestParam(value = "programId", defaultValue = "*") String programId) throws IOException {
+    public PagedResponse<KonsentrasiKeahlian> getKonsentrasiKeahlians(
+            @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size,
+            @RequestParam(value = "programId", defaultValue = "*") String programId) throws IOException {
         return konsentrasiKeahlianService.getAllKonsentrasiKeahlian(page, size, programId);
     }
 
     @PostMapping
-    public ResponseEntity<?> createKonsentrasiKeahlian(@Valid @RequestBody KonsentrasiKeahlianRequest konsentrasiKeahlianRequest) throws IOException {
-        KonsentrasiKeahlian konsentrasiKeahlian = konsentrasiKeahlianService.createKonsentrasiKeahlian(konsentrasiKeahlianRequest);
+    public ResponseEntity<?> createKonsentrasiKeahlian(
+            @Valid @RequestBody KonsentrasiKeahlianRequest konsentrasiKeahlianRequest) throws IOException {
+        KonsentrasiKeahlian konsentrasiKeahlian = konsentrasiKeahlianService
+                .createKonsentrasiKeahlian(konsentrasiKeahlianRequest);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{konsentrasiKeahlianId}")
@@ -57,15 +60,16 @@ public class KonsentrasiKeahlianController {
     }
 
     @GetMapping("/{konsentrasiKeahlianId}")
-    public DefaultResponse<KonsentrasiKeahlian> getKonsentrasiKeahlianById(@PathVariable String konsentrasiKeahlianId) throws IOException {
+    public DefaultResponse<KonsentrasiKeahlian> getKonsentrasiKeahlianById(@PathVariable String konsentrasiKeahlianId)
+            throws IOException {
         return konsentrasiKeahlianService.getKonsentrasiKeahlianById(konsentrasiKeahlianId);
     }
 
-
     @PutMapping("/{konsentrasiKeahlianId}")
     public ResponseEntity<?> updateKonsentrasiKeahlian(@PathVariable String konsentrasiKeahlianId,
-                                              @Valid @RequestBody KonsentrasiKeahlianRequest konsentrasiKeahlianRequest) throws IOException {
-        KonsentrasiKeahlian konsentrasiKeahlian = konsentrasiKeahlianService.updateKonsentrasiKeahlian(konsentrasiKeahlianId, konsentrasiKeahlianRequest);
+            @Valid @RequestBody KonsentrasiKeahlianRequest konsentrasiKeahlianRequest) throws IOException {
+        KonsentrasiKeahlian konsentrasiKeahlian = konsentrasiKeahlianService
+                .updateKonsentrasiKeahlian(konsentrasiKeahlianId, konsentrasiKeahlianRequest);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{konsentrasiKeahlianId}")
@@ -76,7 +80,8 @@ public class KonsentrasiKeahlianController {
     }
 
     @DeleteMapping("/{konsentrasiKeahlianId}")
-    public HttpStatus deleteKonsentrasiKeahlian(@PathVariable (value = "konsentrasiKeahlianId") String konsentrasiKeahlianId) throws IOException {
+    public HttpStatus deleteKonsentrasiKeahlian(
+            @PathVariable(value = "konsentrasiKeahlianId") String konsentrasiKeahlianId) throws IOException {
         konsentrasiKeahlianService.deleteKonsentrasiKeahlianById(konsentrasiKeahlianId);
         return HttpStatus.FORBIDDEN;
     }

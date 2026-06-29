@@ -829,95 +829,31 @@ const UjianCATView = () => {
     return "#52c41a";
   };
 
-  // Handle jawaban berdasarkan jenis soal
-  const handleJawaban = async (soalId, jawaban_baru) => {
+  // Handle jawaban berdasarkan jenis soal — hanya simpan ke state lokal
+  // Pengiriman ke server dilakukan saat klik tombol Selanjutnya (nextSoal)
+  const handleJawaban = (soalId, jawaban_baru) => {
     const soal = soalList.find((s) => s.idBankSoal === soalId);
     let formattedJawaban = jawaban_baru;
 
     // Format jawaban berdasarkan jenis soal
     if (soal?.jenisSoal === "MULTI") {
-      formattedJawaban = Array.isArray(jawaban_baru)
-        ? jawaban_baru
-        : [jawaban_baru];
-    } else if (soal?.jenisSoal === "COCOK") {
-      formattedJawaban = jawaban_baru;
-    } else if (soal?.jenisSoal === "ISIAN") {
-      formattedJawaban = jawaban_baru;
+      formattedJawaban = Array.isArray(jawaban_baru) ? jawaban_baru : [jawaban_baru];
     } else {
       formattedJawaban = jawaban_baru;
     }
 
+    // Simpan ke state lokal saja
     setJawaban((prev) => ({
       ...prev,
       [soalId]: formattedJawaban,
     }));
-
-    // Save individual answer immediately
-    try {
-      const saveResponse = await saveJawaban({
-        idUjian: ujianData.idUjian,
-        idPeserta: userInfo.id,
-        sessionId: sessionId,
-        idBankSoal: soalId,
-        jawaban: formattedJawaban,
-        attemptNumber: attemptNumber,
-        timestamp: new Date().toISOString(),
-      });
-
-      // ========== HANDLE CAT RESPONSE ==========
-      if (isCatMode && saveResponse?.data?.data) {
-        const catData = saveResponse.data.data;
-        setCatAnsweredCount((prev) => prev + 1);
-
-        if (catData.thetaEstimate !== undefined) setThetaEstimate(catData.thetaEstimate);
-        if (catData.scaledScore !== undefined) setScaledScore(catData.scaledScore);
-        if (catData.proficiencyLevel !== undefined) setProficiencyLevel(catData.proficiencyLevel);
-
-        const shouldStop = catData.shouldStop === true || catData.nextQuestionId == null;
-        setCatShouldStop(shouldStop);
-
-        if (!shouldStop && catData.nextQuestionId) {
-          // Navigasi ke soal berikutnya yang dipilih server
-          setNextCatQuestionId(catData.nextQuestionId);
-          const nextIdx = soalList.findIndex(
-            (s) => s.idBankSoal === catData.nextQuestionId
-          );
-          if (nextIdx !== -1) {
-            setTimeout(() => goToSoal(nextIdx), 300);
-          } else {
-            console.warn("[CAT] nextQuestionId tidak ditemukan di soalList:", catData.nextQuestionId);
-          }
-        } else if (shouldStop) {
-          // CAT selesai - tampilkan konfirmasi submit
-          Modal.confirm({
-            title: "Ujian CAT Selesai",
-            content: (
-              <div>
-                <p>Sistem telah menentukan bahwa estimasi kemampuan Anda sudah cukup akurat.</p>
-                {catData.proficiencyLevel && (
-                  <p>Level kemampuan: <strong>{catData.proficiencyLevel}</strong></p>
-                )}
-                <p>Apakah Anda ingin mengumpulkan jawaban sekarang?</p>
-              </div>
-            ),
-            okText: "Kumpulkan",
-            cancelText: "Lanjut Isi",
-            onOk: () => handleSubmitUjian(false),
-          });
-        }
-      }
-      // ========================================
-    } catch (error) {
-      console.error("Failed to save individual answer:", error);
-    }
   };
 
   // Navigasi soal
   const goToSoal = async (index) => {
     setCurrentSoal(index);
-    setSelectedLeftItem(null); // Reset selected item when changing questions
+    setSelectedLeftItem(null);
 
-    // Update current soal index on server
     try {
       await updateCurrentSoal(ujianData.idUjian, userInfo.id, index);
     } catch (error) {
@@ -929,14 +865,85 @@ const UjianCATView = () => {
     }
   };
 
-  const nextSoal = () => {
-    if (currentSoal < soalList.length - 1) {
-      goToSoal(currentSoal + 1);
+  /**
+   * nextSoal — tombol Selanjutnya
+   * Di mode CAT: kirim jawaban ke server, cek benar/salah:
+   *   - Salah  → auto-submit ujian langsung (tanpa popup)
+   *   - Benar  → navigasi ke soal adaptif berikutnya
+   * Di mode non-CAT: navigasi biasa ke soal + 1
+   */
+  const nextSoal = async () => {
+    // Mode non-CAT: navigasi biasa
+    if (!isCatMode) {
+      if (currentSoal < soalList.length - 1) {
+        goToSoal(currentSoal + 1);
+      }
+      return;
+    }
+
+    // Mode CAT: harus ada jawaban untuk soal saat ini
+    const currentSoalId = soalList[currentSoal]?.idBankSoal;
+    if (!currentSoalId) return;
+
+    const currentJawaban = jawaban[currentSoalId];
+    if (currentJawaban === undefined || currentJawaban === null || currentJawaban === "") {
+      message.warning("Pilih jawaban terlebih dahulu sebelum melanjutkan.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Kirim jawaban ke server
+      const saveResponse = await saveJawaban({
+        idUjian: ujianData.idUjian,
+        idPeserta: userInfo.id,
+        sessionId: sessionId,
+        idBankSoal: currentSoalId,
+        jawaban: currentJawaban,
+        attemptNumber: attemptNumber,
+        timestamp: new Date().toISOString(),
+      });
+
+      if (saveResponse?.data?.data) {
+        const catData = saveResponse.data.data;
+        setCatAnsweredCount((prev) => prev + 1);
+
+        if (catData.thetaEstimate !== undefined) setThetaEstimate(catData.thetaEstimate);
+        if (catData.scaledScore !== undefined) setScaledScore(catData.scaledScore);
+        if (catData.proficiencyLevel !== undefined) setProficiencyLevel(catData.proficiencyLevel);
+
+        if (catData.isAnswerCorrect === false || catData.shouldStopDueToWrongAnswer === true) {
+          // ❌ Jawaban SALAH → hentikan ujian langsung tanpa popup
+          console.log("[CAT] Jawaban salah, menghentikan ujian...");
+          message.error({ content: "Jawaban salah. Ujian dihentikan.", duration: 2 });
+          await handleSubmitUjian(false);
+        } else if (catData.nextQuestionId) {
+          // ✅ Jawaban BENAR → navigasi ke soal berikutnya
+          setNextCatQuestionId(catData.nextQuestionId);
+          const nextIdx = soalList.findIndex((s) => s.idBankSoal === catData.nextQuestionId);
+          if (nextIdx !== -1) {
+            goToSoal(nextIdx);
+          } else {
+            console.warn("[CAT] nextQuestionId tidak ditemukan:", catData.nextQuestionId);
+            // Tidak ada soal berikutnya → selesai
+            await handleSubmitUjian(false);
+          }
+        } else {
+          // Soal habis → submit otomatis
+          await handleSubmitUjian(false);
+        }
+      }
+    } catch (error) {
+      console.error("[CAT] Error saat kirim jawaban:", error);
+      message.error("Gagal menyimpan jawaban.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const prevSoal = () => {
-    if (currentSoal > 0 && ujianData.allowBacktrack) {
+    if (!isCatMode && currentSoal > 0 && ujianData.allowBacktrack) {
       goToSoal(currentSoal - 1);
     }
   };

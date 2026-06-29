@@ -358,6 +358,14 @@ const BankSoal = () => {
     const item = list.find(
       (item) => normalizeString(item[nameField]) === normalizedName
     );
+    if (!item) {
+      console.warn(
+        `[mapNameToId] Tidak ditemukan: "${name}" di field "${nameField}". Available: [${list
+          .slice(0, 10)
+          .map((i) => i[nameField])
+          .join(", ")}${list.length > 10 ? `, ...+${list.length - 10} lagi` : ""}]`
+      );
+    }
     return item ? item[idField] : null;
   };
 
@@ -390,7 +398,7 @@ const BankSoal = () => {
       "idTaksonomi"
     );
 
-  const handleImportFile = (file, questionType) => {
+  const handleImportFile = async (file, questionType) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = async (e) => {
@@ -405,6 +413,70 @@ const BankSoal = () => {
         // Index kolom sesuai header
         const idx = (col) => header.indexOf(col);
 
+        console.log("[Import] Header CSV:", header);
+        console.log("[Import] Jumlah baris data:", rows.length);
+
+        // ─── Fetch fresh mapping data directly to avoid stale state ───
+        let freshMapping = null;
+        try {
+          const [
+            semesterRes, mapelRes, tahunRes, elemenRes,
+            kelasRes, acpRes, atpRes, konsentrasiRes, taksonomiRes,
+          ] = await Promise.all([
+            import("@/api/semester").then((m) => m.getSemester()),
+            import("@/api/mapel").then((m) => m.getMapel()),
+            import("@/api/tahun-ajaran").then((m) => m.getTahunAjaran()),
+            import("@/api/elemen").then((m) => m.getElemen()),
+            import("@/api/kelas").then((m) => m.getKelas()),
+            import("@/api/acp").then((m) => m.getACP()),
+            import("@/api/atp").then((m) => m.getATP()),
+            import("@/api/konsentrasiKeahlianSekolah").then((m) => m.getKonsentrasiSekolah()),
+            import("@/api/taksonomi").then((m) => m.getTaksonomi()),
+          ]);
+          freshMapping = {
+            semesterList: semesterRes.data.content || [],
+            mapelList: mapelRes.data.content || [],
+            tahunAjaranList: tahunRes.data.content || [],
+            elemenList: elemenRes.data.content || [],
+            kelasList: kelasRes.data.content || [],
+            acpList: acpRes.data.content || [],
+            atpList: atpRes.data.content || [],
+            konsentrasiSekolahList: konsentrasiRes.data.content || [],
+            taksonomiList: taksonomiRes.data.content || [],
+          };
+          console.log("[Import] Fresh mapping fetched:", {
+            semesterList: freshMapping.semesterList.length,
+            mapelList: freshMapping.mapelList.length,
+            tahunAjaranList: freshMapping.tahunAjaranList.length,
+            elemenList: freshMapping.elemenList.length,
+            kelasList: freshMapping.kelasList.length,
+            acpList: freshMapping.acpList.length,
+            atpList: freshMapping.atpList.length,
+            konsentrasiSekolahList: freshMapping.konsentrasiSekolahList.length,
+            taksonomiList: freshMapping.taksonomiList.length,
+          });
+        } catch (fetchErr) {
+          console.warn("[Import] Gagal fetch fresh mapping, fallback ke state:", fetchErr);
+          freshMapping = mappingData;
+        }
+
+        // Local mapping helper using fresh data (avoids React stale-state issue)
+        const localNormalize = (str) => {
+          if (!str) return "";
+          return str.toString().toLowerCase().replace(/[\s\-_.,!@#$%^&*()]/g, "");
+        };
+        const localMap = (name, list, nameField, idField) => {
+          if (!name || !list || list.length === 0) return null;
+          const norm = localNormalize(name);
+          const found = list.find((item) => localNormalize(item[nameField]) === norm);
+          if (!found) {
+            console.warn(
+              `[Import][mapNameToId] Tidak cocok: "${name}" di field "${nameField}". Tersedia: [${list.slice(0, 10).map((i) => i[nameField]).join(", ")}${list.length > 10 ? `, ...+${list.length - 10} lagi` : ""}]`
+            );
+          }
+          return found ? found[idField] : null;
+        };
+
         let successCount = 0;
         let errorCount = 0;
 
@@ -413,22 +485,20 @@ const BankSoal = () => {
           if (!row[idx("namaUjian")] || !row[idx("pertanyaan")]) continue;
 
           const clean = (val) =>
-            (val ?? "").toString().replace(/['"` \s]/g, ""); // hapus petik satu, dua, backtick, dan spasi dari field tertentu
+            (val ?? "").toString().replace(/['"`\s]/g, ""); // hapus petik satu, dua, backtick, dan spasi dari field tertentu
           const cleanText = (val) => (val ?? "").toString(); // untuk text yang perlu dipertahankan formatnya
 
           try {
-            // Map names to IDs using the mapping functions
-            const tahunAjaranId = mapTahunAjaranToId(row[idx("tahunAjaran")]);
-            const semesterId = mapSemesterNameToId(row[idx("namaSemester")]);
-            const kelasId = mapKelasNameToId(row[idx("namaKelas")]);
-            const mapelId = mapMapelNameToId(row[idx("namaMapel")]);
-            const elemenId = mapElemenNameToId(row[idx("namaElemen")]);
-            const acpId = mapAcpNameToId(row[idx("namaAcp")]);
-            const atpId = mapAtpNameToId(row[idx("namaAtp")]);
-            const konsentrasiId = mapKonsentrasiNameToId(
-              row[idx("namaKonsentrasiSekolah")]
-            );
-            const taksonomiId = mapTaksonomiNameToId(row[idx("namaTaksonomi")]);
+            // Map names to IDs using fresh data
+            const tahunAjaranId = localMap(row[idx("tahunAjaran")], freshMapping.tahunAjaranList, "tahunAjaran", "idTahun");
+            const semesterId = localMap(row[idx("namaSemester")], freshMapping.semesterList, "namaSemester", "idSemester");
+            const kelasId = localMap(row[idx("namaKelas")], freshMapping.kelasList, "namaKelas", "idKelas");
+            const mapelId = localMap(row[idx("namaMapel")], freshMapping.mapelList, "name", "idMapel");
+            const elemenId = localMap(row[idx("namaElemen")], freshMapping.elemenList, "namaElemen", "idElemen");
+            const acpId = localMap(row[idx("namaAcp")], freshMapping.acpList, "namaAcp", "idAcp");
+            const atpId = localMap(row[idx("namaAtp")], freshMapping.atpList, "namaAtp", "idAtp");
+            const konsentrasiId = localMap(row[idx("namaKonsentrasiSekolah")], freshMapping.konsentrasiSekolahList, "namaKonsentrasiSekolah", "idKonsentrasiSekolah");
+            const taksonomiId = localMap(row[idx("namaTaksonomi")], freshMapping.taksonomiList, "namaTaksonomi", "idTaksonomi");
 
             // Validate required fields
             if (
@@ -441,19 +511,21 @@ const BankSoal = () => {
               );
             }
 
-            if (
-              !tahunAjaranId ||
-              !semesterId ||
-              !kelasId ||
-              !mapelId ||
-              !elemenId ||
-              !acpId ||
-              !atpId ||
-              !konsentrasiId ||
-              !taksonomiId
-            ) {
+            // Build detail of which fields failed mapping
+            const failedMappings = [];
+            if (!tahunAjaranId) failedMappings.push(`tahunAjaran="${row[idx("tahunAjaran")]}" (tersedia: ${freshMapping.tahunAjaranList.slice(0,5).map(i=>i.tahunAjaran).join(", ")})`);
+            if (!semesterId) failedMappings.push(`namaSemester="${row[idx("namaSemester")]}" (tersedia: ${freshMapping.semesterList.slice(0,5).map(i=>i.namaSemester).join(", ")})`);
+            if (!kelasId) failedMappings.push(`namaKelas="${row[idx("namaKelas")]}" (tersedia: ${freshMapping.kelasList.slice(0,5).map(i=>i.namaKelas).join(", ")})`);
+            if (!mapelId) failedMappings.push(`namaMapel="${row[idx("namaMapel")]}" (tersedia: ${freshMapping.mapelList.slice(0,5).map(i=>i.name).join(", ")})`);
+            if (!elemenId) failedMappings.push(`namaElemen="${row[idx("namaElemen")]}" (tersedia: ${freshMapping.elemenList.slice(0,5).map(i=>i.namaElemen).join(", ")})`);
+            if (!acpId) failedMappings.push(`namaAcp="${row[idx("namaAcp")]}" (tersedia: ${freshMapping.acpList.slice(0,5).map(i=>i.namaAcp).join(", ")})`);
+            if (!atpId) failedMappings.push(`namaAtp="${row[idx("namaAtp")]}" (tersedia: ${freshMapping.atpList.slice(0,5).map(i=>i.namaAtp).join(", ")})`);
+            if (!konsentrasiId) failedMappings.push(`namaKonsentrasiSekolah="${row[idx("namaKonsentrasiSekolah")]}" (tersedia: ${freshMapping.konsentrasiSekolahList.slice(0,5).map(i=>i.namaKonsentrasiSekolah).join(", ")})`);
+            if (!taksonomiId) failedMappings.push(`namaTaksonomi="${row[idx("namaTaksonomi")]}" (tersedia: ${freshMapping.taksonomiList.slice(0,5).map(i=>i.namaTaksonomi).join(", ")})`);
+
+            if (failedMappings.length > 0) {
               throw new Error(
-                "Gagal mapping nama ke ID. Periksa data: tahunAjaran, namaSemester, namaKelas, namaMapel, namaElemen, namaAcp, namaAtp, namaKonsentrasiSekolah, namaTaksonomi"
+                `Gagal mapping nama ke ID. Field berikut tidak ditemukan di database:\n${failedMappings.join("\n")}\n\nPastikan nilai di CSV persis sama dengan data yang ada di sistem.`
               );
             }
 
