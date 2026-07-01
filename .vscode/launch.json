@@ -1,0 +1,133 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "UniversityApplication",
+            "request": "launch",
+            "mainClass": "com.doyatama.university.UniversityApplication",
+            "projectName": "university"
+        },
+        {
+            "type": "java",
+            "name": "AutoSubmitTestHelper",
+            "request": "launch",
+            "mainClass": "com.doyatama.university.test.AutoSubmitTestHelper",
+            "projectName": "university"
+        },
+        {
+            "type": "java",
+            "name": "DeleteData",
+            "request": "launch",
+            "mainClass": "create_structure.DeleteData",
+            "projectName": "university"
+        },
+        {
+            "type": "java",
+            "name": "HBaseClientStructure",
+            "request": "launch",
+            "mainClass": "create_structure.HBaseClientStructure",
+            "projectName": "university"
+        },
+        {
+            "type": "java",
+            "name": "HBaseClientStructureTest",
+            "request": "launch",
+            "mainClass": "create_structure.HBaseClientStructureTest",
+            "projectName": "university"
+        },
+        {
+            "type": "java",
+            "name": "SeederDataElemen",
+            "request": "launch",
+            "mainClass": "create_structure.MasterDataSeeder.APAT.SeederDataElemen",
+            "projectName": "university"
+        },
+        {
+            "type": "java",
+            "name": "SeederDataACP",
+            "request": "launch",
+            "mainClass": "create_structure.MasterDataSeeder.DKV.SeederDataACP",
+            "projectName": "university"
+        },
+        {
+            "type": "java",
+            "name": "SeederDataATP",
+            "request": "launch",
+            "mainClass": "create_structure.MasterDataSeeder.DKV.SeederDataATP",
+            "projectName": "university"
+        },
+        {
+            "type": "java",
+            "name": "SeederDataElemen(1)",
+            "request": "launch",
+            "mainClass": "create_structure.MasterDataSeeder.DKV.SeederDataElemen",
+            "projectName": "university"
+        },
+        {
+            "type": "java",
+            "name": "SeederDataElemen(2)",
+            "request": "launch",
+            "mainClass": "create_structure.MasterDataSeeder.DPB.SeederDataElemen",
+            "projectName": "university"
+        },
+        {
+            "type": "java",
+            "name": "SeederDataMapel",
+            "request": "launch",
+            "mainClass": "create_structure.MasterDataSeeder.SeederDataMapel",
+            "projectName": "university"
+        },
+        {
+            "type": "java",
+            "name": "SeederDataElemen(3)",
+            "request": "launch",
+            "mainClass": "create_structure.MasterDataSeeder.TSM.SeederDataElemen",
+            "projectName": "university"
+        },
+        {
+            "type": "java",
+            "name": "SeederDataAll",
+            "request": "launch",
+            "mainClass": "create_structure.SeederDataAll",
+            "projectName": "university"
+        },
+        {
+            "type": "java",
+            "name": "SeederDataBK",
+            "request": "launch",
+            "mainClass": "create_structure.SeederDataBK",
+            "projectName": "university"
+        },
+        {
+            "type": "java",
+            "name": "SeederDataKK",
+            "request": "launch",
+            "mainClass": "create_structure.SeederDataKK",
+            "projectName": "university"
+        },
+        {
+            "type": "java",
+            "name": "SeederDataPK",
+            "request": "launch",
+            "mainClass": "create_structure.SeederDataPK",
+            "projectName": "university"
+        },
+        {
+            "type": "java",
+            "name": "SeederUser",
+            "request": "launch",
+            "mainClass": "create_structure.SeederUser",
+            "projectName": "university"
+        }
+    ]
+}
