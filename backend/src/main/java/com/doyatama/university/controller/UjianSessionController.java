@@ -202,11 +202,21 @@ public class UjianSessionController {
             responseData.put("progressPercentage", session.getProgressPercentage());
 
             // Data CAT/IRT jika mode adaptif aktif
-            if (session.getUjian() != null && Boolean.TRUE.equals(session.getUjian().getIsCatEnabled())) {
+            // PERBAIKAN: session.getUjian().getIsCatEnabled() bisa null untuk session lama.
+            // Deteksi mode CAT dengan prioritas: field isCatEnabled dari session ujian, atau keberadaan currentAdaptiveQuestionId
+            boolean isCatSession = (session.getUjian() != null && Boolean.TRUE.equals(session.getUjian().getIsCatEnabled()))
+                    || session.getCurrentAdaptiveQuestionId() != null
+                    || (session.getThetaEstimate() != null && session.getThetaEstimate() != 0.0);
+
+            if (isCatSession) {
                 // Cek apakah jawaban yang baru disimpan benar atau salah
                 boolean answerCorrect = ujianSessionService.checkLastAnswerCorrect(
                         session.getUjian(), request.getIdBankSoal(), request.getJawaban());
                 boolean stopDueToWrong = !answerCorrect; // Berhenti jika jawaban salah
+
+                logger.info("[CAT] soal={} jawaban={} benar={} nextQ={} isCatSession={}",
+                        request.getIdBankSoal(), request.getJawaban(), answerCorrect,
+                        session.getCurrentAdaptiveQuestionId(), isCatSession);
 
                 responseData.put("isCatMode", true);
                 responseData.put("isAnswerCorrect", answerCorrect);

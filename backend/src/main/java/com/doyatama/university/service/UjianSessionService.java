@@ -208,11 +208,25 @@ public class UjianSessionService {
         }
 
         // Update estimasi IRT dan pilih soal berikutnya jika mode CAT aktif
-        if (session.getUjian() != null && Boolean.TRUE.equals(session.getUjian().getIsCatEnabled())) {
-            catIrtService.updateSessionEstimate(session, session.getUjian());
-            logger.debug("CAT updated: theta={}, SE={}, nextQuestion={}",
-                    session.getThetaEstimate(), session.getStandardError(),
-                    session.getCurrentAdaptiveQuestionId());
+        // PERBAIKAN: Selalu load Ujian penuh dari repository karena session.getUjian() hanya
+        // menyimpan data parsial (tanpa bankSoalList dan mungkin tanpa isCatEnabled).
+        String idUjianForCat = session.getUjian() != null ? session.getUjian().getIdUjian() : session.getIdUjian();
+        if (idUjianForCat != null) {
+            try {
+                com.doyatama.university.model.Ujian fullUjianForCat = ujianRepository.findById(idUjianForCat);
+                if (fullUjianForCat != null && Boolean.TRUE.equals(fullUjianForCat.getIsCatEnabled())) {
+                    // Sinkronkan isCatEnabled ke objek ujian parsial dalam session agar tersimpan nanti
+                    if (session.getUjian() != null) {
+                        session.getUjian().setIsCatEnabled(true);
+                    }
+                    catIrtService.updateSessionEstimate(session, fullUjianForCat);
+                    logger.debug("[CAT] Updated: theta={}, SE={}, nextQuestion={}",
+                            session.getThetaEstimate(), session.getStandardError(),
+                            session.getCurrentAdaptiveQuestionId());
+                }
+            } catch (Exception e) {
+                logger.warn("[CAT] Gagal load/update Ujian penuh (idUjian={}): {}", idUjianForCat, e.getMessage());
+            }
         }
 
         // Update waktu update

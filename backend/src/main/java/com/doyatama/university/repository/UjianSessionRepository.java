@@ -115,6 +115,12 @@ public class UjianSessionRepository {
                 client.insertRecord(table, rowKey, "ujian", "durasiMenit",
                         ujianSession.getUjian().getDurasiMenit().toString());
             }
+
+            // PERBAIKAN: Simpan isCatEnabled agar session tahu mode CAT saat di-reload
+            if (ujianSession.getUjian().getIsCatEnabled() != null) {
+                client.insertRecord(table, rowKey, "ujian", "isCatEnabled",
+                        ujianSession.getUjian().getIsCatEnabled().toString());
+            }
         }
 
         // Save Peserta relationship
@@ -183,6 +189,36 @@ public class UjianSessionRepository {
             if (ujianSession.getLastAutoSave() != null) {
                 client.insertRecord(table, rowKey, "tracking", "lastAutoSave",
                         ujianSession.getLastAutoSave().toString());
+            }
+
+            // PERBAIKAN: Simpan field CAT/IRT agar tidak hilang saat session di-reload
+            if (ujianSession.getThetaEstimate() != null) {
+                client.insertRecord(table, rowKey, "tracking", "thetaEstimate",
+                        ujianSession.getThetaEstimate().toString());
+            }
+
+            if (ujianSession.getStandardError() != null) {
+                client.insertRecord(table, rowKey, "tracking", "standardError",
+                        ujianSession.getStandardError().toString());
+            }
+
+            if (ujianSession.getCurrentAdaptiveQuestionId() != null) {
+                client.insertRecord(table, rowKey, "tracking", "currentAdaptiveQuestionId",
+                        ujianSession.getCurrentAdaptiveQuestionId());
+            }
+
+            if (ujianSession.getAdministeredQuestionIds() != null) {
+                String administeredJson = objectMapper.writeValueAsString(ujianSession.getAdministeredQuestionIds());
+                client.insertRecord(table, rowKey, "tracking", "administeredQuestionIds", administeredJson);
+            } else {
+                client.insertRecord(table, rowKey, "tracking", "administeredQuestionIds", "[]");
+            }
+
+            if (ujianSession.getAdaptiveMetadata() != null && !ujianSession.getAdaptiveMetadata().isEmpty()) {
+                String adaptiveMetadataJson = objectMapper.writeValueAsString(ujianSession.getAdaptiveMetadata());
+                client.insertRecord(table, rowKey, "tracking", "adaptiveMetadata", adaptiveMetadataJson);
+            } else {
+                client.insertRecord(table, rowKey, "tracking", "adaptiveMetadata", "{}");
             }
 
         } catch (JsonProcessingException e) {
@@ -423,6 +459,13 @@ public class UjianSessionRepository {
         columnMapping.put("lastKeepAliveTime", "lastKeepAliveTime");
         columnMapping.put("lastAutoSave", "lastAutoSave");
 
+        // PERBAIKAN: Field CAT/IRT agar terbaca kembali dari HBase
+        columnMapping.put("thetaEstimate", "thetaEstimate");
+        columnMapping.put("standardError", "standardError");
+        columnMapping.put("currentAdaptiveQuestionId", "currentAdaptiveQuestionId");
+        columnMapping.put("administeredQuestionIds", "administeredQuestionIds");
+        columnMapping.put("adaptiveMetadata", "adaptiveMetadata");
+
         // Relationships
         columnMapping.put("ujian", "ujian");
         columnMapping.put("peserta", "peserta");
@@ -439,6 +482,8 @@ public class UjianSessionRepository {
         indexedFields.put("answers", "MAP");
         indexedFields.put("sessionMetadata", "MAP");
         indexedFields.put("navigationHistory", "MAP");
+        indexedFields.put("administeredQuestionIds", "LIST");
+        indexedFields.put("adaptiveMetadata", "MAP");
         return indexedFields;
     }
 
