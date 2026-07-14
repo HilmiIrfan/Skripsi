@@ -6,7 +6,7 @@
     <!-- HBase Root Directory -->
     <property>
         <name>hbase.rootdir</name>
-        <value>hdfs://hadoop-primary:9000/hbase</value>
+        <value>hdfs://10.184.0.2:9000/hbase</value>
     </property>
 
     <!-- Cluster Configuration -->
@@ -18,7 +18,7 @@
     <!-- ZooKeeper Configuration - DIPERBAIKI -->
     <property>
         <name>hbase.zookeeper.quorum</name>
-        <value>192.168.50.40,192.168.50.50,192.168.50.60</value>
+        <value>10.184.0.5,10.184.0.6,10.184.0.7</value>
     </property>
 
     <property>
@@ -35,7 +35,7 @@
     <!-- HBase Master Configuration - DIPERBAIKI -->
     <property>
         <name>hbase.master.hostname</name>
-        <value>hadoop-primary</value>
+        <value>10.184.0.2</value>
     </property>
 
     <property>
@@ -71,7 +71,7 @@
 <configuration>
     <property>
         <name>hbase.rootdir</name>
-        <value>hdfs://hadoop-primary:9000/hbase</value>
+        <value>hdfs://10.184.0.2:9000/hbase</value>
     </property>
     <property>
         <name>hbase.cluster.distributed</name>
