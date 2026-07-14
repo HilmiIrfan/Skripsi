@@ -209,6 +209,16 @@ public class HBaseClientStructure {
                 client.deleteTable(tableUjianAnalysis);
                 client.createTable(tableUjianAnalysis, ujianAnalysisColumns);
 
+                // ==============================================================================================
+                // Create Table CAT Exposure Control (Sympson-Hetter)
+                // Row Key   : idBankSoal
+                // CF "stats": exposureCount, selectionCount, updatedAt
+                // ==============================================================================================
+                TableName tableCatExposure = TableName.valueOf("cat_exposure");
+                String[] catExposureColumns = { "stats" };
+                client.deleteTable(tableCatExposure);
+                client.createTable(tableCatExposure, catExposureColumns);
+
                 // // Create Table Jawaban Siswa
                 // TableName tableJawaban = TableName.valueOf("jawabanSiswa");
                 // String[] jawaban = { "main", "school", "soal", "detail", "timing" };
