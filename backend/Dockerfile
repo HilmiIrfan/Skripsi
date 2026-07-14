@@ -2,9 +2,8 @@
 FROM maven:3.8.6-eclipse-temurin-8 AS build
 WORKDIR /app
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
 COPY src ./src
-RUN mvn clean package -DskipTests
+RUN mvn clean package -DskipTests -B
 
 # Stage 2: Runtime
 FROM eclipse-temurin:8-jre-jammy
