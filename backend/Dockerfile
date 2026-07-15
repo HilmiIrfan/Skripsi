@@ -12,13 +12,6 @@ COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 
 ENTRYPOINT ["java", \
-  "--add-opens", "java.base/java.nio=ALL-UNNAMED", \
-  "--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", \
-  "--add-opens", "java.base/java.lang=ALL-UNNAMED", \
-  "--add-opens", "java.base/java.lang.reflect=ALL-UNNAMED", \
-  "--add-opens", "java.base/java.io=ALL-UNNAMED", \
-  "--add-opens", "java.base/java.util=ALL-UNNAMED", \
-  "--add-opens", "java.base/java.util.concurrent=ALL-UNNAMED", \
   "-Dhadoop.home.dir=/app", \
   "-Djava.library.path=/app", \
   "-jar", "app.jar"]
