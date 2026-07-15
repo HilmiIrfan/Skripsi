@@ -9,9 +9,8 @@ RUN mvn clean package -DskipTests -B
 FROM eclipse-temurin:8-jre-jammy
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 EXPOSE 8080
 
-ENTRYPOINT ["java", \
-  "-Dhadoop.home.dir=/app", \
-  "-Djava.library.path=/app", \
-  "-jar", "app.jar"]
+ENTRYPOINT ["/app/entrypoint.sh"]
